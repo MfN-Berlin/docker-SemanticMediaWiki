@@ -1,7 +1,23 @@
-Repository for playing with Docker and Semantic MediaWiki  [![Build Status](https://travis-ci.org/toniher/docker-SemanticMediaWiki.svg?branch=master)](https://travis-ci.org/toniher/docker-SemanticMediaWiki)
+Docker scripts for creating a semantic MediaWiki with the extensions and layout as used at the Museum für Naturkunde Berlin.
 
-* Parameters are stored in smw.sh script.
-* A MariaDB and a NGINX based PHP images are created.
-* sh smw.sh for building images and starting the process.
-* sh smw-start.sh for starting processes once images are created.
+## Creating a new wiki project
+Create a new project for your wiki. Do not make it public. Add the public docker scripts as submodules.
+```
+git submodule add git@github.com:MfN-Berlin/docker-SemanticMediaWiki.git
+```
+
+## Configuration
+Run ```docker-SemanticMediaWiki/configure``` to create a configuration file.
+The configuration will be saved to ```config.ini``` in the working directory.
+```
+chmod +x docker-SemanticMediaWiki/configure
+docker-SemanticMediaWiki/configure
+```
+
+## Create docker images
+Docker images will be created on your local machine.
+```
+chmod +x docker-SemanticMediaWiki/smw.sh
+docker-SemanticMediaWiki/smw.sh
+```
 

@@ -1,0 +1,7 @@
+{
+	"require": {
+		"mediawiki/semantic-media-wiki": "~2.4",
+		"mediawiki/page-forms": "^4.0"
+	}
+
+}

@@ -1,17 +1,15 @@
 #! /bin/bash
 
-#
 # Create a docker container with a MediaWiki installation
 # Create a docker container with a MariaDB installation
 #
 # @author Alvaro Ortiz for Museum fuer Naturkunde, 2017
 # contact: alvaro.OrtizTroncoso@mfn-berlin.de
-#
-echo "Specify a configuration file or else only config.ini will be used."
+
 echo "Please choose:"
-echo "1. Setup new Docker Container"
-echo "2. Start Docker Container (local)"
-echo "3. Stop Docker Container"
+echo "1. Build new Docker Containers"
+echo "2. Start Docker Containers (local)"
+echo "3. Stop Docker Containers"
 echo "4. Import from another wiki"
 echo "5. Import a database dump and media directory, create sysop"
 echo "6. Pack and deploy on test server"
@@ -23,7 +21,7 @@ read -p "? " opt
 # Read configuration options
 source config.ini
 # NOTE: this will export db and wiki passwords to environment of
-# the (local) machine where the wimages are build.
+# the (local) machine where the images are build.
 export SMW_CONTAINER
 export DB_CONTAINER
 export NETWORK
@@ -70,8 +68,40 @@ usage() {
     echo "See README."
 }
 
-build() {
-    cd $HOST_FILES    
+##############################
+#
+# Build the database container
+#
+##############################
+build_db() {
+    docker build \
+	   -f $HOST_FILES/mariadb/dockerfile \
+	   -t $DB_CONTAINER $HOST_FILES/mariadb
+
+    # Run on the default network during image creation
+    docker run --name $DB_CONTAINER \
+	   -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+	   -e MYSQL_DATABASE=$MYSQL_DATABASE \
+	   -e MYSQL_USER=$MYSQL_USER \
+	   -e MYSQL_PASSWORD=$MYSQL_PASSWORD \
+	   -v $DB_MOUNT:/var/lib/mysql \
+	   -p $PORTDB:3306 \
+	   -d \
+	   $DB_CONTAINER
+
+    ## Use the IP address from the default network during installation.
+    MARIADB_HOST=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DB_CONTAINER`
+    CACHE_INSTALL=`date +%Y-%m-%d-%H-%M`
+}
+
+##############################
+#
+# Build the wiki container
+#
+##############################
+build_smw() {
+    cd $HOST_FILES/smw
+    
     # Prepare Localsettings from template
     cp LocalSettings.tpl.php LocalSettings.php
     sed -i "s|@@ScriptPath@@|$MW_SCRIPTPATH|g" LocalSettings.php
@@ -86,9 +116,94 @@ build() {
     sed -i "s|@@bgColor@@|$MW_BGCOL|g" LocalSettings.php
     sed -i "s|@@skin@@|$MW_SKIN|g" LocalSettings.php
     sed -i "s|@@skintpl@@|$MW_SKINTPL|g" LocalSettings.php
+    cd ../../
+
+    # Copy the skin to the container context 
+    mkdir -p $HOST_FILES/smw/skins
+    cp -r $MW_SKIN $HOST_FILES/smw/skins
     
-    # Create docker image
-    ./ikon_smw.sh
+    docker build \
+    --build-arg UPLOAD_MOUNT=$UPLOAD_MOUNT \
+    --build-arg MW_EMAIL=$MW_EMAIL \
+    --build-arg MEDIAWIKI_VERSION=$MEDIAWIKI_VERSION \
+    --build-arg MEDIAWIKI_FULL_VERSION=$MEDIAWIKI_FULL_VERSION \
+    --build-arg MYSQL_DATABASE=$MYSQL_DATABASE \
+    --build-arg MYSQL_USER=$MYSQL_USER \
+    --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD \
+    --build-arg MYSQL_HOST=$MARIADB_HOST \
+    --build-arg MYSQL_PREFIX=$MYSQL_PREFIX \
+    --build-arg MW_PASSWORD=$MW_PASSWORD \
+    --build-arg MW_SCRIPTPATH=$MW_SCRIPTPATH \
+    --build-arg MW_DOCKERDIR=$MW_DOCKERDIR \
+    --build-arg MW_WIKINAME=$MW_WIKINAME \
+    --build-arg MW_WIKIUSER=$MW_WIKIUSER \
+    --build-arg CACHE_INSTALL=$CACHE_INSTALL \
+    --build-arg MW_SKIN=$MW_SKIN \
+    --build-arg UserFunctions_DOWNLOAD_URL=$UserFunctions_DOWNLOAD_URL \
+    --build-arg HeaderTabs_DOWNLOAD_URL=$HeaderTabs_DOWNLOAD_URL \
+    --build-arg WikiCategoryTagCloud_DOWNLOAD_URL=$WikiCategoryTagCloud_DOWNLOAD_URL \
+    --build-arg SimpleChanges_DOWNLOAD_URL=$SimpleChanges_DOWNLOAD_URL \
+    --build-arg Lockdown_DOWNLOAD_URL=$Lockdown_DOWNLOAD_URL \
+    --build-arg PDFEmbed_DOWNLOAD_URL=$PDFEmbed_DOWNLOAD_URL \
+    --build-arg LDAP_DOWNLOAD_URL=$LDAP_DOWNLOAD_URL \
+    --build-arg VisualEditor_DOWNLOAD_URL=$VisualEditor_DOWNLOAD_URL \
+    --build-arg ParserFunctions_DOWNLOAD_URL=$ParserFunctions_DOWNLOAD_URL \
+    --build-arg CategoryTree_DOWNLOAD_URL=$CategoryTree_DOWNLOAD_URL \
+    --build-arg WikiEditor_DOWNLOAD_URL=$WikiEditor_DOWNLOAD_URL \
+    -f $HOST_FILES/smw/dockerfile \
+    -t $SMW_CONTAINER $HOST_FILES/smw/
+
+    # Run on the default network during image creation
+    docker run --name $SMW_CONTAINER \
+    -p $PORT:80 \
+    -v $UPLOAD_MOUNT:$MW_DOCKERDIR/images \
+    -d \
+    $SMW_CONTAINER
+
+    # cleanup
+    rm $HOST_FILES/smw/LocalSettings.php
+    rm -r $HOST_FILES/smw/skins
+}
+
+createSysop() {
+    docker exec -ti $SMW_CONTAINER script -q -c "php $MW_DOCKERDIR/maintenance/createAndPromote.php --force --bureaucrat --sysop $MW_WIKIUSER $MW_PASSWORD"
+}
+
+stop() {
+    # stop all containers
+    docker stop $(docker ps -a -q)
+}
+
+start() {
+    ## create a network
+    docker network create --driver bridge $NETWORK
+    
+    # start the db container
+    docker rm $DB_CONTAINER
+    docker run \
+	   --name $DB_CONTAINER \
+	   --network=$NETWORK \
+	   -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+	   -e MYSQL_DATABASE=$MYSQL_DATABASE \
+	   -e MYSQL_USER=$MYSQL_USER \
+	   -e MYSQL_PASSWORD=$MYSQL_PASSWORD \
+	   -v $LOG_MOUNT:/var/log \
+	   -p $PORTDB:3306 \
+	   -d \
+	   $DB_CONTAINER
+
+    # start the mediawiki container
+    docker rm $SMW_CONTAINER
+    docker run \
+	   --name $SMW_CONTAINER \
+	   --network=$NETWORK \
+	   -p $PORT:80 \
+	   -v $UPLOAD_MOUNT:$MW_DOCKERDIR/images \
+	   -d \
+	   $SMW_CONTAINER
+
+    ## Change the address of the database in wiki LocalSettings to the name of the mariadb container in the newly created network.
+    docker exec -ti $SMW_CONTAINER script -q -c "sed -i 's|\$wgDBserver = \(.*\);|\$wgDBserver = \"$DB_CONTAINER\";|g' $MW_DOCKERDIR/LocalSettings.php"
 }
 
 import() {
@@ -104,10 +219,10 @@ import() {
 
     # import database dump
     echo "Loading database dump"
-    sudo docker cp $MYSQL_DUMP $DB_CONTAINER:dump.sql
+    docker cp $MYSQL_DUMP $DB_CONTAINER:dump.sql
     # sudo docker exec -ti $DB_CONTAINER script -q -c "mysqladmin -u root -p$MYSQL_ROOT_PASSWORD create $MYSQL_DATABASE"
-    sudo docker exec -ti $DB_CONTAINER script -q -c "mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < dump.sql"
-    sudo docker exec -ti $DB_CONTAINER script -q -c "grant all privileges on mfn_fp.* to 'mediawiki'@'%';"
+    docker exec -ti $DB_CONTAINER script -q -c "mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < dump.sql"
+    docker exec -ti $DB_CONTAINER script -q -c "grant all privileges on mfn_fp.* to 'mediawiki'@'%';"
 
     # import media
     docker cp $MEDIA $SMW_CONTAINER:$MW_DOCKERDIR/media2
@@ -117,24 +232,6 @@ import() {
     # cleanup
     docker exec -ti $SMW_CONTAINER script -q -c "cd $MW_DOCKERDIR && rm -r media2"
     docker exec -ti $DB_CONTAINER script -q -c "rm dump.sql"
-    rm LocalSettings.php
-}
-
-createSysop() {
-    docker exec -ti $SMW_CONTAINER script -q -c "php $MW_DOCKERDIR/maintenance/createAndPromote.php --force --bureaucrat --sysop $MW_WIKIUSER $MW_PASSWORD"
-}
-
-start() {
-    ## create a network
-    docker network create --driver bridge $NETWORK
-    
-    # Start docker container
-    $HOST_FILES/ikon_smw_start.sh
-}
-
-stop() {
-    # stop all containers
-    docker stop $(docker ps -a -q)
 }
 
 importwiki() {
@@ -247,9 +344,10 @@ case $opt in
         usage
         ;;
     1)
-        build
+        build_db
+	build_smw
 	stop
-	echo "Now start the containers and import a database dump."
+	start
         ;;
     2)
         configure

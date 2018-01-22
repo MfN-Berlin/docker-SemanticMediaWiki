@@ -1,0 +1,37 @@
+# This is a sample configuration file
+#
+# Copy this file to config.yaml and edit that file to fit your needs.
+#
+# Also see:
+# - `npm start -- -h` for more information about passing config files via
+#   the commandline.
+# - lib/config/ParsoidConfig.js for all the properties that you can configure
+#   here. Not all properties are documented here.
+
+worker_heartbeat_timeout: 300000
+
+logging:
+    level: info
+
+#metrics:
+#    type: log
+
+services:
+  - module: lib/index.js
+    entrypoint: apiServiceWorker
+    conf:
+       
+        mwApis:
+        - # This is the only required parameter,
+          # the URL of you MediaWiki API endpoint.
+          uri: 'http://localhost/fp/api.php'
+          # The "domain" is used for communication with Visual Editor
+          # and RESTBase.  It defaults to the hostname portion of
+          # the `uri` property below, but you can manually set it
+          # to an arbitrary string.
+          domain: 'localhost'  # optional
+
+          # Allow override of port/interface:
+          serverPort: 8142
+
+

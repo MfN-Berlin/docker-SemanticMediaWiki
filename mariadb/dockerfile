@@ -15,4 +15,7 @@ EXPOSE 3306
 VOLUME /var/lib/mysql
 RUN chown -R mysql:mysql /var/lib/mysql
 
+# Custom settings
+COPY mariadb.cnf /etc/mysql/conf.d/
 
+   

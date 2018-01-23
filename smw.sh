@@ -7,61 +7,16 @@
 # contact: alvaro.OrtizTroncoso@mfn-berlin.de
 
 echo "Please choose:"
-echo "1. Build new Docker Containers"
-echo "2. Start Docker Containers (local)"
-echo "3. Stop Docker Containers"
-echo "4. Import from another wiki"
-echo "5. Import a database dump and media directory, create sysop"
-echo "6. Pack and deploy on test server"
-echo "7. Dump database for import"
-echo "13: Kill all images and volumes (use when the hard disk is full)"
+echo "1. Build new Docker containers"
+echo "2. Start Docker containers"
+echo "3. Stop Docker containers"
+echo "4. Pack and deploy on test server"
+echo "13: Kill all images and volumes (run as root)"
 echo "0. Usage"
 read -p "? " opt
 
 # Read configuration options
 source config.ini
-# NOTE: this will export db and wiki passwords to environment of
-# the (local) machine where the images are build.
-export SMW_CONTAINER
-export DB_CONTAINER
-export NETWORK
-export UPLOAD_MOUNT
-export DB_MOUNT
-export LOG_MOUNT
-export MEDIAWIKI_VERSION
-export MEDIAWIKI_FULL_VERSION
-export DOMAIN_NAME
-export MYSQL_ROOT_PASSWORD
-export MYSQL_DATABASE
-export MYSQL_USER
-export MYSQL_PASSWORD
-export MYSQL_PREFIX
-export MYSQL_DUMP
-export MEDIA
-export MW_PASSWORD
-export MW_SCRIPTPATH
-export MW_DOCKERDIR
-export MW_WIKINAME
-export MW_WIKIUSER
-export MW_EMAIL
-export PORT
-export PORTDB
-export MW_LOGO
-export MW_BG
-export MW_BGCOL
-export MW_SKIN
-export MW_SKINTPL
-export UserFunctions_DOWNLOAD_URL
-export HeaderTabs_DOWNLOAD_URL
-export WikiCategoryTagCloud_DOWNLOAD_URL
-export SimpleChanges_DOWNLOAD_URL
-export Lockdown_DOWNLOAD_URL
-export PDFEmbed_DOWNLOAD_URL
-export LDAP_DOWNLOAD_URL
-export VisualEditor_DOWNLOAD_URL
-export ParserFunctions_DOWNLOAD_URL
-export CategoryTree_DOWNLOAD_URL
-export WikiEditor_DOWNLOAD_URL
 
 usage() {
     # Show usage information
@@ -88,15 +43,12 @@ build_db() {
 	   -p $PORTDB:3306 \
 	   -d \
 	   $DB_CONTAINER
-
-    ## Use the IP address from the default network during installation.
-    MARIADB_HOST=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DB_CONTAINER`
-    CACHE_INSTALL=`date +%Y-%m-%d-%H-%M`
 }
 
 ##############################
 #
 # Build the wiki container
+# Create the network.
 #
 ##############################
 build_smw() {
@@ -121,6 +73,12 @@ build_smw() {
     # Copy the skin to the container context 
     mkdir -p $HOST_FILES/smw/skins
     cp -r $MW_SKIN $HOST_FILES/smw/skins
+    # Copy the logo to the container context
+    cp $MW_SKIN/Logo.png $HOST_FILES/smw
+    
+    ## Use the IP address from the default network during installation.
+    MARIADB_HOST=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DB_CONTAINER`
+    CACHE_INSTALL=`date +%Y-%m-%d-%H-%M`
     
     docker build \
     --build-arg UPLOAD_MOUNT=$UPLOAD_MOUNT \
@@ -160,41 +118,37 @@ build_smw() {
     -d \
     $SMW_CONTAINER
 
+    ## Stop the containers, as they need to be restarted using the custom network.
+    stop
+
+    ## create a network
+    docker network create --driver bridge $NETWORK
+
     # cleanup
     rm $HOST_FILES/smw/LocalSettings.php
     rm -r $HOST_FILES/smw/skins
 }
 
-createSysop() {
-    docker exec -ti $SMW_CONTAINER script -q -c "php $MW_DOCKERDIR/maintenance/createAndPromote.php --force --bureaucrat --sysop $MW_WIKIUSER $MW_PASSWORD"
-}
-
-stop() {
-    # stop all containers
-    docker stop $(docker ps -a -q)
-}
-
+####################################
+#
+# Start the wiki and db containers.
+#
+####################################
 start() {
-    ## create a network
-    docker network create --driver bridge $NETWORK
-    
     # start the db container
     docker rm $DB_CONTAINER
     docker run \
+	   --restart always \
 	   --name $DB_CONTAINER \
 	   --network=$NETWORK \
-	   -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
-	   -e MYSQL_DATABASE=$MYSQL_DATABASE \
-	   -e MYSQL_USER=$MYSQL_USER \
-	   -e MYSQL_PASSWORD=$MYSQL_PASSWORD \
-	   -v $LOG_MOUNT:/var/log \
-	   -p $PORTDB:3306 \
+	   -v $DB_MOUNT:/var/lib/mysql \
 	   -d \
 	   $DB_CONTAINER
 
     # start the mediawiki container
     docker rm $SMW_CONTAINER
     docker run \
+	   --restart always \
 	   --name $SMW_CONTAINER \
 	   --network=$NETWORK \
 	   -p $PORT:80 \
@@ -204,41 +158,19 @@ start() {
 
     ## Change the address of the database in wiki LocalSettings to the name of the mariadb container in the newly created network.
     docker exec -ti $SMW_CONTAINER script -q -c "sed -i 's|\$wgDBserver = \(.*\);|\$wgDBserver = \"$DB_CONTAINER\";|g' $MW_DOCKERDIR/LocalSettings.php"
+
+    echo "Access wiki at: http://localhost:$PORT/wiki"
 }
 
-import() {
-    # read name of database dump file to import from input, if not set in config.ini
-    if [ -z ${MYSQL_DUMP+x} ]; then read -p "Name of the database dump file to import: " MYSQL_DUMP; fi
-    echo "";
-    export MYSQL_DUMP
-    
-    # read name of media directory to import from input, if not set in config.ini
-    if [ -z ${MEDIA+x} ]; then read -p "Media directory to import: " MEDIA; fi
-    echo "";    
-    export MEDIA
-
-    # import database dump
-    echo "Loading database dump"
-    docker cp $MYSQL_DUMP $DB_CONTAINER:dump.sql
-    # sudo docker exec -ti $DB_CONTAINER script -q -c "mysqladmin -u root -p$MYSQL_ROOT_PASSWORD create $MYSQL_DATABASE"
-    docker exec -ti $DB_CONTAINER script -q -c "mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < dump.sql"
-    docker exec -ti $DB_CONTAINER script -q -c "grant all privileges on mfn_fp.* to 'mediawiki'@'%';"
-
-    # import media
-    docker cp $MEDIA $SMW_CONTAINER:$MW_DOCKERDIR/media2
-    docker exec -ti $SMW_CONTAINER script -q -c "cp -r $MW_DOCKERDIR/media2/* $MW_DOCKERDIR/images/"
-    docker exec -ti $SMW_CONTAINER script -q -c "chown -R www-data:www-data $MW_DOCKERDIR/images/"
-    
-    # cleanup
-    docker exec -ti $SMW_CONTAINER script -q -c "cd $MW_DOCKERDIR && rm -r media2"
-    docker exec -ti $DB_CONTAINER script -q -c "rm dump.sql"
-}
-
-importwiki() {
-    # Import from another wiki
-    php ./importFp/migrateWiki.php
-    # rebuild the wiki database after import
-    docker exec -it $SMW_CONTAINER php $MW_DOCKERDIR/maintenance/rebuildall.php
+###################################
+#
+# Stop the wiki and db containers.
+#
+###################################
+stop() {
+    # stop all containers
+    docker stop $SMW_CONTAINER
+    docker stop $DB_CONTAINER
 }
 
 deploy_test() {
@@ -323,20 +255,22 @@ dump_db() {
 }
 
 killallimages() {
+    # remove all containers and images
     docker rm -f $(docker ps -a -q) && docker rmi -f $(docker images -q) && docker rmi -f $(docker images -a -q)
     docker network rm $NETWORK
     service docker stop
+    # delete docker files directly
     rm -rf /var/lib/docker/aufs
     rm -rf /var/lib/docker/image/aufs
     rm -f /var/lib/docker/linkgraph.db
     rm -rf /var/lib/docker/volumes
-    service docker start
-    df -h
-}
-
-dropalldata() {
+    # delete all saved data on the host
     rm -rf $UPLOAD_MOUNT
     rm -rf $DB_MOUNT
+    # restart service
+    service docker start
+    # show partition usage
+    df -h
 }
 
 case $opt in 
@@ -346,38 +280,20 @@ case $opt in
     1)
         build_db
 	build_smw
-	stop
 	start
         ;;
     2)
-        configure
         start
-	echo "If this is the first run, you may need to import a database dump."
         ;;
     3)
         stop
         ;;
     4)
-        importwiki
-        feedback
-        ;;
-    5)
-        configure
-        import
-        createSysop
-        feedback
-        ;;
-    6)
         configure
         deploy_test
         ;;
-    7)
-        configure
-        dump_db
-        ;;
     13)
         killallimages
-	dropalldata
         ;;      
     *)
         echo "Unbekannte Option"

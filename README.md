@@ -20,18 +20,19 @@ Docker images will be created on your local machine.
 chmod +x docker-SemanticMediaWiki/smw.sh
 docker-SemanticMediaWiki/smw.sh
 ```
-and choose:
+and choose: ```1. Build new Docker Containers```
+
+## Stopping and starting
+To stop and start the docker images on your local machine, do:
 ```
-1. Build new Docker Containers
+docker-SemanticMediaWiki/smw.sh
 ```
+and choose: ```2. Start Docker Containers``` or ```3. Stop Docker Containers```.
 
 ## Deleting docker images
 To delete all docker images and other files from your local machine, call the smw.sk script as root
 ```
 sudo docker-SemanticMediaWiki/smw.sh
 ```
-and choose:
-```
-13: Kill all images and volumes (use when the hard disk is full)
-```
+and choose: ```13: Kill all images and volumes (run as root)```
 

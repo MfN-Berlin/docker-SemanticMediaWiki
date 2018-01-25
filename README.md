@@ -1,7 +1,8 @@
 Docker scripts for creating a semantic MediaWiki with the extensions and layout as used at the Museum für Naturkunde Berlin.
 
 ## Creating a new wiki project
-Create a new project for your wiki. Do not make it public, as sensitive configuration will be saved here. Add the public docker scripts as submodules.
+Create a new project for your wiki, e.g. on your local machine or using GitLab.
+Add the public docker scripts as submodules.
 ```
 git submodule add git@github.com:MfN-Berlin/docker-SemanticMediaWiki.git
 ```
@@ -30,7 +31,7 @@ docker-SemanticMediaWiki/smw.sh
 and choose: ```2. Start Docker Containers``` or ```3. Stop Docker Containers```.
 
 ## Deleting docker images
-To delete all docker images and other files from your local machine, call the smw.sk script as root
+To delete all docker images and other files from your local machine, call the smw.sh script as root
 ```
 sudo docker-SemanticMediaWiki/smw.sh
 ```

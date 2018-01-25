@@ -88,6 +88,7 @@ echo "";
 
 ## Create config.ini file
 cp docker-SemanticMediaWiki/install/example.ini config.ini;
+sed -i "s|@@PROJECT@@|$PROJECT|g" config.ini
 sed -i "s|@@MW_WIKINAME@@|$MW_WIKINAME|g" config.ini
 sed -i "s|@@MYSQL_ROOT_PASSWORD@@|$MYSQL_ROOT_PASSWORD|g" config.ini
 sed -i "s|@@MYSQL_PASSWORD@@|$MYSQL_PASSWORD|g" config.ini

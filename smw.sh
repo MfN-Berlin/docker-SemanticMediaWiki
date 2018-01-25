@@ -10,7 +10,6 @@ echo "Please choose:"
 echo "1. Build new Docker containers"
 echo "2. Start Docker containers"
 echo "3. Stop Docker containers"
-echo "4. Pack and deploy on test server"
 echo "13: Kill all images and volumes (run as root)"
 echo "0. Usage"
 read -p "? " opt
@@ -173,87 +172,18 @@ stop() {
     docker stop $DB_CONTAINER
 }
 
-deploy_test() {
-    # read username to connnect to the testserver username from input, if not set in config.ini
-    if [ -z ${TEST_USERNAME+x} ]; then read -p "Username for testserver $TEST_USERNAME: " TEST_USERNAME; fi
-    echo "";
-        
-    # pack images
-    echo "packing /tmp/$DB_CONTAINER.tar"
-    docker save -o /tmp/$DB_CONTAINER.tar $DB_CONTAINER
-    echo "packing /tmp/$SMW_CONTAINER.tar"
-    docker save -o /tmp/$SMW_CONTAINER.tar $SMW_CONTAINER
 
-    # upload docker images
-    echo "connecting to $TEST_USERNAME@$TEST_SERVER_IP"
-    ssh $TEST_USERNAME@$TEST_SERVER_IP "mkdir -p $TEST_SERVER_PATH"
-    scp /tmp/$DB_CONTAINER.tar $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH
-    scp /tmp/$SMW_CONTAINER.tar $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH
-    
-    # dump database
-    dump_db
-    
-    # upload database dump
-    echo "connecting to $TEST_USERNAME@$TEST_SERVER_IP"
-    scp /tmp/dump.sql $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH
-
-    # dump media dir
-    dump_media
-
-    # upload media dir
-    echo "connecting to $TEST_USERNAME@$TEST_SERVER_IP"
-    scp -r /tmp/images $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH
-    
-    # upload proxy configuration
-    echo "Uploading proxy configuration to $TEST_SERVER_PATH/test-ikon.cfg"
-    echo "The first time, you will have to add the proxy configuration to /etc/pound.cfg"
-    scp deploy/test-ikon.cfg $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH
-
-    # upload docker container startup scripts
-    scp install/load.sh $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH
-    scp install/import.sh $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH
-    scp install/start.sh $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH
-    scp mfn_fp.ini $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH
-    ssh $TEST_USERNAME@$TEST_SERVER_IP "mkdir -p $TEST_SERVER_PATH/ikon-smw-stack"
-    scp ./ikon-smw-stack/ikon_smw_test.sh $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH/ikon-smw-stack
-    scp ./ikon-smw-stack/mariadb-custom.cnf $TEST_USERNAME@$TEST_SERVER_IP:$TEST_SERVER_PATH/ikon-smw-stack
-
-    # cleanup
-    rm /tmp/$DB_CONTAINER.tar
-    rm /tmp/$SMW_CONTAINER.tar
-    rm /tmp/dump.sql
-    rm -rf /tmp/images
-}
-
-dump_media() {
-    echo "Dumping media dir to /tmp/images"
-    rm -f /tmp/images
-    docker cp $SMW_CONTAINER:$MW_DOCKERDIR/images /tmp/
-}
-
-dump_db() {     
-    # read database root password from input, if not set in config.ini
-    if [ -z ${MYSQL_ROOT_PASSWORD+x} ]; then read -s -p "Password for database root: " MYSQL_ROOT_PASSWORD; fi
-    echo "";
-    
-    # read mediawiki database name from input, if not set in config.ini
-    if [ -z ${MYSQL_DATABASE+x} ]; then read -p "Name of the database used by this mediawiki: " MYSQL_DATABASE; fi
-    echo "";
-    
-    export DB_CONTAINER
-    export MYSQL_ROOT_PASSWORD
-    export MYSQL_DATABASE
-    
-    # dump database
-    echo "Dumping database to /tmp/dump.sql"
-    docker exec -ti $DB_CONTAINER  script -q -c "/usr/bin/mysqldump -uroot -p$MYSQL_PASSWORD $MYSQL_DATABASE > /tmp/dump.sql"
-    # Copy the dump to the host
-    rm -f /tmp/dump.sql
-    docker cp $DB_CONTAINER:/tmp/dump.sql /tmp/dump.sql
-    # Cleanup
-    docker exec -ti $DB_CONTAINER  script -q -c "rm /tmp/dump.sql"
-}
-
+#########################################
+#
+# Cleanup everything
+# (all images of all projects),
+# the hard way.
+#
+# * remove all containers and images
+# * delete docker files directly
+# * delete all saved data on the host
+#
+#########################################
 killallimages() {
     # remove all containers and images
     docker rm -f $(docker ps -a -q) && docker rmi -f $(docker images -q) && docker rmi -f $(docker images -a -q)
@@ -287,10 +217,6 @@ case $opt in
         ;;
     3)
         stop
-        ;;
-    4)
-        configure
-        deploy_test
         ;;
     13)
         killallimages

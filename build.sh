@@ -24,6 +24,24 @@ usage() {
 
 ##############################
 #
+# Build all the containers
+# Create the network.
+# (db container has to be created first).
+#
+##############################
+build() {
+    build_db
+    build_smw
+    
+    ## Stop the containers, as they need to be restarted using the custom network.
+    stop
+
+    ## create a network
+    docker network create --driver bridge $NETWORK
+}
+
+##############################
+#
 # Build the database container
 #
 ##############################
@@ -47,7 +65,6 @@ build_db() {
 ##############################
 #
 # Build the wiki container
-# Create the network.
 #
 ##############################
 build_smw() {
@@ -110,21 +127,7 @@ build_smw() {
     -f $HOST_FILES/smw/dockerfile \
     -t $SMW_CONTAINER $HOST_FILES/smw/
 
-    # Run on the default network during image creation
-    docker run --name $SMW_CONTAINER \
-    -p $PORT:80 \
-    -v $UPLOAD_MOUNT:$MW_DOCKERDIR/images \
-    -d \
-    $SMW_CONTAINER
-
-    ## Stop the containers, as they need to be restarted using the custom network.
-    stop
-
-    ## create a network
-    docker network create --driver bridge $NETWORK
-
     # cleanup
-    rm $HOST_FILES/smw/LocalSettings.php
     rm -r $HOST_FILES/smw/skins
 }
 
@@ -152,6 +155,7 @@ start() {
 	   --network=$NETWORK \
 	   -p $PORT:80 \
 	   -v $UPLOAD_MOUNT:$MW_DOCKERDIR/images \
+	   -v LocalSettings.php:$MW_DOCKERDIR/LocalSettings.php  \
 	   -d \
 	   $SMW_CONTAINER
 
@@ -208,8 +212,7 @@ case $opt in
         usage
         ;;
     1)
-        build_db
-	build_smw
+        build
 	start
         ;;
     2)

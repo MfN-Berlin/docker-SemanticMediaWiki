@@ -74,6 +74,14 @@ then DB_MOUNT=$ANSWER_5;
 fi
 echo "";
 
+# Where to put configuration files. Path on the host, relative to where the container was started.
+CONFIG_MOUNT=$PROJECT-mount/config
+read -p "Where to put config files (on the host). Path on the host, relative to where the container was started (default $CONFIG_MOUNT): " ANSWER_6;
+if [ ${ANSWER_6} ];
+then CONFIG_MOUNT=$ANSWER_6;
+fi
+echo "";
+
 # Where to deploy the wiki for testing
 #read -p "IP of the server used for testing: " TEST_SERVER_IP;
 #echo "";
@@ -100,6 +108,7 @@ sed -i "s|@@MYSQL_DATABASE@@|$MYSQL_DATABASE|g" config.ini
 sed -i "s|@@SMW_CONTAINER@@|$SMW_CONTAINER|g" config.ini
 sed -i "s|@@DB_CONTAINER@@|$DB_CONTAINER|g" config.ini
 sed -i "s|@@NETWORK@@|$NETWORK|g" config.ini
+sed -i "s|@@CONFIG_MOUNT@@|$CONFIG_MOUNT|g" config.ini
 sed -i "s|@@UPLOAD_MOUNT@@|$UPLOAD_MOUNT|g" config.ini
 sed -i "s|@@DB_MOUNT@@|$DB_MOUNT|g" config.ini
 #sed -i "s|@@TEST_SERVER_IP@@|$TEST_SERVER_IP|g" config.ini

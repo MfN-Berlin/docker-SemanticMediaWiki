@@ -7,7 +7,7 @@
 # contact: alvaro.OrtizTroncoso@mfn-berlin.de
 
 echo "Please choose:"
-echo "1. Build new Docker containers"
+echo "1. Build new Docker containers (run as root)"
 echo "2. Start Docker containers"
 echo "3. Stop Docker containers"
 echo "13: Kill all images and volumes (run as root)"
@@ -31,13 +31,9 @@ usage() {
 ##############################
 build() {
     build_db
+    pre_build_smw
     build_smw
-    
-    ## Stop the containers, as they need to be restarted using the custom network.
-    stop
-
-    ## create a network
-    docker network create --driver bridge $NETWORK
+    post_build
 }
 
 ##############################
@@ -50,7 +46,7 @@ build_db() {
 	   -f $HOST_FILES/mariadb/dockerfile \
 	   -t $DB_CONTAINER $HOST_FILES/mariadb
 
-    # Run on the default network during image creation
+    # Run on the default network ("bridge") during image creation
     docker run --name $DB_CONTAINER \
 	   -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
 	   -e MYSQL_DATABASE=$MYSQL_DATABASE \
@@ -62,18 +58,25 @@ build_db() {
 	   $DB_CONTAINER
 }
 
-##############################
+#####################################
 #
-# Build the wiki container
+# Create config files from templates
 #
-##############################
-build_smw() {
+#####################################
+pre_build_smw() {
+
+    ## Use the IP address from the default network during installation.
+    MARIADB_HOST=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DB_CONTAINER`
+    CACHE_INSTALL=`date +%Y-%m-%d-%H-%M`
+    
+    ## Create LocalSettings.php
     cd $HOST_FILES/smw
     
     # Prepare Localsettings from template
     cp LocalSettings.tpl.php LocalSettings.php
     sed -i "s|@@ScriptPath@@|$MW_SCRIPTPATH|g" LocalSettings.php
     sed -i "s|@@WikiName@@|$MW_WIKINAME|g" LocalSettings.php
+    sed -i "s|@@dbServer@@|$MARIADB_HOST|g" LocalSettings.php
     sed -i "s|@@database@@|$MYSQL_DATABASE|g" LocalSettings.php
     sed -i "s|@@dbUser@@|$MYSQL_USER|g" LocalSettings.php
     sed -i "s|@@dbPass@@|$MYSQL_PASSWORD|g" LocalSettings.php
@@ -91,11 +94,15 @@ build_smw() {
     cp -r $MW_SKIN $HOST_FILES/smw/skins
     # Copy the logo to the container context
     cp $MW_SKIN/Logo.png $HOST_FILES/smw
-    
-    ## Use the IP address from the default network during installation.
-    MARIADB_HOST=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DB_CONTAINER`
-    CACHE_INSTALL=`date +%Y-%m-%d-%H-%M`
-    
+
+}
+
+##############################
+#
+# Build the wiki container
+#
+##############################
+build_smw() {
     docker build \
     --build-arg UPLOAD_MOUNT=$UPLOAD_MOUNT \
     --build-arg MW_EMAIL=$MW_EMAIL \
@@ -131,6 +138,25 @@ build_smw() {
     rm -r $HOST_FILES/smw/skins
 }
 
+#####################################
+#
+# Create the network.
+# Update network settings
+# Restart
+#
+#####################################
+post_build() {
+    ## Stop the containers, as they need to be restarted using the custom network.
+    stop
+    ## create a network
+    docker network create --driver bridge $NETWORK
+    ## Copy the LocalSettings file to the mount point for configuration files
+    mkdir -p $CONFIG_MOUNT
+    mv  $HOST_FILES/smw/LocalSettings.php $CONFIG_MOUNT
+    ## Change the address of the database in wiki LocalSettings to the name of the mariadb container in the custom created network.
+    sed -i "s|\$wgDBserver = \(.*\);|\$wgDBserver = \"$DB_CONTAINER\";|g" $CONFIG_MOUNT/LocalSettings.php
+}
+
 ####################################
 #
 # Start the wiki and db containers.
@@ -155,13 +181,12 @@ start() {
 	   --network=$NETWORK \
 	   -p $PORT:80 \
 	   -v $UPLOAD_MOUNT:$MW_DOCKERDIR/images \
-	   -v LocalSettings.php:$MW_DOCKERDIR/LocalSettings.php  \
+	   -v $CONFIG_MOUNT/LocalSettings.php:$MW_DOCKERDIR/LocalSettings.php  \
 	   -d \
 	   $SMW_CONTAINER
 
-    ## Change the address of the database in wiki LocalSettings to the name of the mariadb container in the newly created network.
-    docker exec -ti $SMW_CONTAINER script -q -c "sed -i 's|\$wgDBserver = \(.*\);|\$wgDBserver = \"$DB_CONTAINER\";|g' $MW_DOCKERDIR/LocalSettings.php"
-
+    # feedback
+    docker ps | grep $PROJECT
     echo "Access wiki at: http://localhost:$PORT/wiki"
 }
 
@@ -213,7 +238,6 @@ case $opt in
         ;;
     1)
         build
-	start
         ;;
     2)
         start
@@ -223,7 +247,10 @@ case $opt in
         ;;
     13)
         killallimages
-        ;;      
+        ;;
+    20)
+	post_build
+	;;
     *)
         echo "Unbekannte Option"
         ;;

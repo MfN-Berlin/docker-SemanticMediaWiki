@@ -17,7 +17,7 @@ docker-SemanticMediaWiki/configure
 ## Create docker images
 Docker images will be created on your local machine.
 ```
-
+docker-SemanticMediaWiki/build.sh
 ```
 and choose: ```1. Build new Docker Containers```
 

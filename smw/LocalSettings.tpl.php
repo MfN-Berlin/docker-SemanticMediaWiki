@@ -68,7 +68,7 @@ $wgDBtype = "mysql";
 
 # This has to be an IP on the default network for creating the image
 # Change it later when deploying the image
-$wgDBserver = "172.17.0.2";
+$wgDBserver = "@@dbServer@@";
 
 $wgDBname = "@@database@@";
 $wgDBuser = "@@dbUser@@";

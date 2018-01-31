@@ -273,6 +273,7 @@ RUN chown -R root:root $MW_DOCKERDIR/
 
 # uploads belong to webserver user
 RUN mkdir -p $MW_DOCKERDIR/images
+RUN touch $MW_DOCKERDIR/images/dummy
 RUN chown -R www-data:www-data $MW_DOCKERDIR/images
 
 # cache belongs to webserver user
@@ -294,11 +295,13 @@ RUN rm  -f $MW_DOCKERDIR/nginx.conf
 RUN rm  -f $MW_DOCKERDIR/parsoid_config.yaml
 RUN rm  -f $MW_DOCKERDIR/sites-available-default
 RUN rm  -f $MW_DOCKERDIR/Dockerfile
-RUN rm  -f $MW_DOCKERDIR/*.dockerfile
+RUN rm  -f $MW_DOCKERDIR/dockerfile
 RUN rm  -f $MW_DOCKERDIR/*.conf
 RUN rm  -f $MW_DOCKERDIR/*.cnf
 RUN rm  -f $MW_DOCKERDIR/*~
 RUN rm  -f $MW_DOCKERDIR/*.sh
+RUN rm  -f $MW_DOCKERDIR/LocalSettings.tpl.php
+
 
 #######################
 #

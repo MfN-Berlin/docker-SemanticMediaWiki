@@ -150,11 +150,14 @@ post_build() {
     stop
     ## create a network
     docker network create --driver bridge $NETWORK
-    ## Copy the LocalSettings file to the mount point for configuration files
+    ## Create the mount point for configuration files
     mkdir -p $CONFIG_MOUNT
+    ## Copy the LocalSettings file to the mount point for configuration files
     mv  $HOST_FILES/smw/LocalSettings.php $CONFIG_MOUNT
     ## Change the address of the database in wiki LocalSettings to the name of the mariadb container in the custom created network.
     sed -i "s|\$wgDBserver = \(.*\);|\$wgDBserver = \"$DB_CONTAINER\";|g" $CONFIG_MOUNT/LocalSettings.php
+    ## Copy the Parsoid configuration file to the mount point for configuration files
+    mv  $HOST_FILES/smw/parsoid_config.yaml $CONFIG_MOUNT    
 }
 
 ####################################
@@ -182,6 +185,7 @@ start() {
 	   -p $PORT:80 \
 	   -v $UPLOAD_MOUNT:$MW_DOCKERDIR/images \
 	   -v $CONFIG_MOUNT/LocalSettings.php:$MW_DOCKERDIR/LocalSettings.php  \
+	   -v $CONFIG_MOUNT/parsoid_config.yaml:/etc/mediawiki/parsoid/config.yaml \
 	   -d \
 	   $SMW_CONTAINER
 

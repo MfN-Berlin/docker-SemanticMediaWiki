@@ -22,25 +22,25 @@ usage() {
     echo "See README."
 }
 
-##############################
+##########################################
 #
 # Build all the containers
 # Create the network.
 # (db container has to be created first).
 #
-##############################
+##########################################
 build() {
     build_db
-    pre_build_smw
+    build_parsoid
     build_smw
     post_build
 }
 
-##############################
+###########################################
 #
-# Build the database container
+# Build the db, Parsoid an wiki containers
 #
-##############################
+###########################################
 build_db() {
     docker build \
 	   -f $HOST_FILES/mariadb/dockerfile \
@@ -58,12 +58,19 @@ build_db() {
 	   $DB_CONTAINER
 }
 
-#####################################
-#
-# Create config files from templates
-#
-#####################################
-pre_build_smw() {
+build_parsoid() {
+    ## Create config.yaml    
+    cd $HOST_FILES/parsoid
+    cp config.tpl.yaml config.yaml
+    sed -i "s|@@SMW_CONTAINER@@|$SMW_CONTAINER|g" config.yaml
+    cd ../../
+    
+    docker build \
+    -f $HOST_FILES/parsoid/dockerfile \
+    -t $PARSOID_CONTAINER $HOST_FILES/parsoid
+}
+
+build_smw() {
 
     ## Use the IP address from the default network during installation.
     MARIADB_HOST=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DB_CONTAINER`
@@ -71,8 +78,6 @@ pre_build_smw() {
     
     ## Create LocalSettings.php
     cd $HOST_FILES/smw
-    
-    # Prepare Localsettings from template
     cp LocalSettings.tpl.php LocalSettings.php
     sed -i "s|@@ScriptPath@@|$MW_SCRIPTPATH|g" LocalSettings.php
     sed -i "s|@@WikiName@@|$MW_WIKINAME|g" LocalSettings.php
@@ -87,6 +92,9 @@ pre_build_smw() {
     sed -i "s|@@bgColor@@|$MW_BGCOL|g" LocalSettings.php
     sed -i "s|@@skin@@|$MW_SKIN|g" LocalSettings.php
     sed -i "s|@@skintpl@@|$MW_SKINTPL|g" LocalSettings.php
+    sed -i "s|@@smwContainer@@|$SMW_CONTAINER|g" LocalSettings.php
+    sed -i "s|@@parsoidContainer@@|$PARSOID_CONTAINER|g" LocalSettings.php
+    sed -i "s|@@network@@|$NETWORK|g" LocalSettings.php
     cd ../../
 
     # Copy the skin to the container context 
@@ -95,14 +103,6 @@ pre_build_smw() {
     # Copy the logo to the container context
     cp $MW_SKIN/Logo.png $HOST_FILES/smw
 
-}
-
-##############################
-#
-# Build the wiki container
-#
-##############################
-build_smw() {
     docker build \
     --build-arg UPLOAD_MOUNT=$UPLOAD_MOUNT \
     --build-arg MW_EMAIL=$MW_EMAIL \
@@ -157,17 +157,33 @@ post_build() {
     ## Change the address of the database in wiki LocalSettings to the name of the mariadb container in the custom created network.
     sed -i "s|\$wgDBserver = \(.*\);|\$wgDBserver = \"$DB_CONTAINER\";|g" $CONFIG_MOUNT/LocalSettings.php
     ## Copy the Parsoid configuration file to the mount point for configuration files
-    mv  $HOST_FILES/smw/parsoid_config.yaml $CONFIG_MOUNT    
+    mv $HOST_FILES/parsoid/config.yaml $CONFIG_MOUNT
 }
 
-####################################
+#############################################
 #
-# Start the wiki and db containers.
+# Start the wiki, Parsoid and db containers.
 #
-####################################
+#############################################
 start() {
     # start the db container
     docker rm $DB_CONTAINER
+    run_db
+
+    # start the Parsoid container
+    docker rm $PARSOID_CONTAINER
+    run_parsoid
+    
+    # start the mediawiki container
+    docker rm $SMW_CONTAINER
+    run_smw
+
+    # feedback
+    docker ps | grep $PROJECT
+    echo "Access wiki at: http://localhost:$PORT/wiki"
+}
+
+run_db() {
     docker run \
 	   --restart always \
 	   --name $DB_CONTAINER \
@@ -175,9 +191,32 @@ start() {
 	   -v $DB_MOUNT:/var/lib/mysql \
 	   -d \
 	   $DB_CONTAINER
+}
 
+run_parsoid() {
+    docker run \
+	   --restart always \
+	   --name $PARSOID_CONTAINER \
+	   --network=$NETWORK \
+	   -p $PORTPARSOID:8000 \
+	   -v $CONFIG_MOUNT/:/data \
+	   -d \
+	   $PARSOID_CONTAINER
+}
+
+#run_parsoid() {
     # start the mediawiki container
-    docker rm $SMW_CONTAINER
+#    docker rm $PARSOID_CONTAINER
+#    docker run \
+#	   --name $PARSOID_CONTAINER \
+#	   --network=$NETWORK \
+#	   -p $PORTPARSOID:8142 \
+#	   -v $CONFIG_MOUNT/parsoid_config.yaml:/usr/lib/parsoid/src/config.yaml \
+#	   -d \
+#	   $PARSOID_CONTAINER
+#}
+
+run_smw() {
     docker run \
 	   --restart always \
 	   --name $SMW_CONTAINER \
@@ -185,23 +224,19 @@ start() {
 	   -p $PORT:80 \
 	   -v $UPLOAD_MOUNT:$MW_DOCKERDIR/images \
 	   -v $CONFIG_MOUNT/LocalSettings.php:$MW_DOCKERDIR/LocalSettings.php  \
-	   -v $CONFIG_MOUNT/parsoid_config.yaml:/etc/mediawiki/parsoid/config.yaml \
 	   -d \
 	   $SMW_CONTAINER
-
-    # feedback
-    docker ps | grep $PROJECT
-    echo "Access wiki at: http://localhost:$PORT/wiki"
 }
 
-###################################
+#############################################
 #
-# Stop the wiki and db containers.
+# Stop the wiki, Parsoid and db containers.
 #
-###################################
+#############################################
 stop() {
     # stop all containers
     docker stop $SMW_CONTAINER
+    docker stop $PARSOID_CONTAINER
     docker stop $DB_CONTAINER
 }
 
@@ -230,6 +265,7 @@ killallimages() {
     # delete all saved data on the host
     rm -rf $UPLOAD_MOUNT
     rm -rf $DB_MOUNT
+    rm -rf $CONFIG_MOUNT
     # restart service
     service docker start
     # show partition usage
@@ -253,7 +289,10 @@ case $opt in
         killallimages
         ;;
     20)
-	post_build
+	build_parsoid
+	;;
+    21)
+	run_parsoid
 	;;
     *)
         echo "Unbekannte Option"

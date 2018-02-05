@@ -50,6 +50,14 @@ then DB_CONTAINER=$ANSWER_2;
 fi
 echo "";
 
+# Name of the container with the Parsoid service
+PARSOID_CONTAINER=$PROJECT-parsoid
+read -p "Name of the container with the Parsoid service (Default $PARSOID_CONTAINER): " ANSWER_25;
+if [ ${ANSWER_25} ];
+then PARSOID_CONTAINER=$ANSWER_25;
+fi
+echo "";
+
 # Own network, to be able to address each other by name
 NETWORK=$PROJECT-nw
 read -p "Own network, to be able to address each other by name (Default $NETWORK): " ANSWER_3;
@@ -103,16 +111,13 @@ sed -i "s|@@MYSQL_PASSWORD@@|$MYSQL_PASSWORD|g" config.ini
 sed -i "s|@@MW_PASSWORD@@|$MW_PASSWORD|g" config.ini
 sed -i "s|@@MW_EMAIL@@|$MW_EMAIL|g" config.ini
 sed -i "s|@@MYSQL_DATABASE@@|$MYSQL_DATABASE|g" config.ini
-#sed -i "s|@@MYSQL_DUMP@@|$MYSQL_DUMP|g" config.ini
-#sed -i "s|@@MEDIA@@|$MEDIA|g" config.ini
 sed -i "s|@@SMW_CONTAINER@@|$SMW_CONTAINER|g" config.ini
 sed -i "s|@@DB_CONTAINER@@|$DB_CONTAINER|g" config.ini
+sed -i "s|@@PARSOID_CONTAINER@@|$PARSOID_CONTAINER|g" config.ini
 sed -i "s|@@NETWORK@@|$NETWORK|g" config.ini
 sed -i "s|@@CONFIG_MOUNT@@|$CONFIG_MOUNT|g" config.ini
 sed -i "s|@@UPLOAD_MOUNT@@|$UPLOAD_MOUNT|g" config.ini
 sed -i "s|@@DB_MOUNT@@|$DB_MOUNT|g" config.ini
-#sed -i "s|@@TEST_SERVER_IP@@|$TEST_SERVER_IP|g" config.ini
-#sed -i "s|@@TEST_SERVER_PATH@@|$TEST_SERVER_PATH|g" config.ini
 
 echo "Saved configuration file to config.ini"
 

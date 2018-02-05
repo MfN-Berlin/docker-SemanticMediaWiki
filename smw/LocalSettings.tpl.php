@@ -186,16 +186,16 @@ $wgDefaultUserOptions['visualeditor-editor'] = "visualeditor";
 # Don't allow users to disable it
 $wgHiddenPrefs[] = 'visualeditor-enable';
 
-$wgVisualEditorParsoidURL = 'http://localhost:8142';
+$wgVisualEditorParsoidURL = 'http://@@parsoidContainer@@:8000';
 
 $wgVirtualRestConfig['modules']['parsoid'] = array(
-// URL to the Parsoid instance
-// Use port 8142 if you use the Debian package
-	'url' => 'http://localhost:8142',
+#// URL to the Parsoid instance
+#// Use port 8142 if you use the Debian package
+	'url' => 'http://@@parsoidContainer@@:8000',
 # Parsoid "domain" (optional)
-	'domain' => 'localhost',
+	'domain' => '@@smwContainer@@',
 # Parsoid "prefix" (optional)
-	'prefix' => 'localhost'
+#	'prefix' => 'localhost'
 );
 
 $wgVisualEditorSupportedSkins[] = 'naturkunde';
@@ -445,28 +445,24 @@ $wgNamespacePermissionLockdown[NS_STK]['protect'] = array( 'mfnEditor', 'sysop')
 $wgNamespacePermissionLockdown[NS_STK]['undelete'] = array( 'mfnUser','mfnEditor', 'sysop');
 $wgNamespacePermissionLockdown[NS_STK]['upload'] = array( 'mfnUser','mfnEditor', 'sysop');
 
-# Allow localhost (and all the loopback IPs) and the host IPs to use the api.
+# Allow Parsoid to use the api.
 # See: http://www.mediawiki.org/wiki/Talk:Parsoid#Running_Parsoid_on_a_.22private.22_wiki_-_AccessDeniedError
 # Also override Lockdown
-$local_ips[] = '127.0.0.1';
-$local_ips[] = '10.0.2.15'; # Get this from ifconfig
-if ( in_array($_SERVER['REMOTE_ADDR'], $local_ips ) ) {
-	$wgGroupPermissions['*']['read'] = true;
-	$wgNamespacePermissionLockdown[NS_MAIN]['read'] = array('*');
-	$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['read'] = array('*');
-	$wgNamespacePermissionLockdown[NS_CATEGORY]['read'] = array('*');
-	$wgGroupPermissions['*']['editinterface'] = true;
+if ( gethostbyaddr($_SERVER["REMOTE_ADDR"])=="@@parsoidContainer@@.@@network@@" ) {
+        $wgGroupPermissions['*']['read'] = true;
+        $wgNamespacePermissionLockdown[NS_MAIN]['read'] = array('*');
+        $wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['read'] = array('*');
+        $wgNamespacePermissionLockdown[NS_CATEGORY]['read'] = array('*');
+        $wgGroupPermissions['*']['editinterface'] = true;
 }
 
 # Allow computers in the MfN Network (not Eduroam) read access to the Wikis main namespace
-$mfn_ips[] = '212.201.100.83'; # all desktops have the same remote address
-if ( in_array($_SERVER['REMOTE_ADDR'], $mfn_ips ) ) {
-	$wgNamespacePermissionLockdown[NS_MAIN]['read'] = array( '*' );
-	$wgNamespacePermissionLockdown[NS_CATEGORY]['read'] = array( '*' );
-	$wgNamespacePermissionLockdown[NS_EXTENDED]['read'] = array( '*' );
-}
-
-
+#$mfn_ips[] = '212.201.100.83'; # all desktops have the same remote address
+#if ( in_array($_SERVER['REMOTE_ADDR'], $mfn_ips ) ) {
+#	$wgNamespacePermissionLockdown[NS_MAIN]['read'] = array( '*' );
+#	$wgNamespacePermissionLockdown[NS_CATEGORY]['read'] = array( '*' );
+#	$wgNamespacePermissionLockdown[NS_EXTENDED]['read'] = array( '*' );
+#}
 
 # Whitelist
 $wgWhitelistRead = array(

@@ -142,29 +142,28 @@ RUN cd $MW_DOCKERDIR; php extensions/SemanticMediaWiki/maintenance/rebuildData.p
 RUN cd $MW_DOCKERDIR; php maintenance/runJobs.php;
 
 # Install nodejs (not from distribution, as outdated)
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get -y install nodejs
+#RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
+#RUN apt-get -y install nodejs
 
 # Install parsoid
-# (Parsoid is broken, the key can't be downloaded)
- RUN apt-get -y install apt-transport-https
- RUN useradd parsoid --no-create-home --home-dir /usr/lib/parsoid --shell /usr/sbin/nologin
- RUN apt-key advanced --keyserver pgp.mit.edu --recv-keys 90E9F83F22250DD7
+#RUN apt-get -y install apt-transport-https
+#RUN useradd parsoid --no-create-home --home-dir /usr/lib/parsoid --shell /usr/sbin/nologin
+#RUN apt-key advanced --keyserver pgp.mit.edu --recv-keys 90E9F83F22250DD7
 
-RUN echo "deb https://releases.wikimedia.org/debian jessie-mediawiki main" | tee /etc/apt/sources.list.d/parsoid.list
-RUN apt-get update
-RUN apt-get -y install parsoid --no-install-recommends
+#RUN echo "deb https://releases.wikimedia.org/debian jessie-mediawiki main" | tee /etc/apt/sources.list.d/parsoid.list
+#RUN apt-get update
+#RUN apt-get -y install parsoid --no-install-recommends
 
-ENV NODE_PATH /usr/lib/parsoid/node_modules:/usr/lib/parsoid/src
+#ENV NODE_PATH /usr/lib/parsoid/node_modules:/usr/lib/parsoid/src
 
 #COPY parsoid_config.yaml /usr/lib/parsoid/src/config.yaml
-COPY parsoid_config.yaml /etc/mediawiki/parsoid/config.yaml
+#COPY parsoid_config.yaml /etc/mediawiki/parsoid/config.yaml
 
-#####################
+############################
 #
 # Extensions (non-composer)
 #
-#####################
+############################
 # prepare extensions directory
 RUN set -x; cd $MW_DOCKERDIR; mkdir -p extensions
 

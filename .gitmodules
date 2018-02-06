@@ -1,3 +1,0 @@
-[submodule "parsoid"]
-	path = parsoid
-	url = git@github.com:MfN-Berlin/docker-parsoid.git

@@ -38,6 +38,7 @@ ARG VisualEditor_DOWNLOAD_URL
 ARG ParserFunctions_DOWNLOAD_URL
 ARG CategoryTree_DOWNLOAD_URL
 ARG WikiEditor_DOWNLOAD_URL
+ARG PageForms_DOWNLOAD_URL
 
 #########################
 #
@@ -237,6 +238,13 @@ RUN cd $MW_DOCKERDIR; \
 	curl -fSL $ParserFunctions_DOWNLOAD_URL -o ParserFunctions.tar.gz \
 	&& tar -xf ParserFunctions.tar.gz -C extensions \
 	&& rm ParserFunctions.tar.gz
+
+# download and untar the PageForms extension
+RUN cd $MW_DOCKERDIR; \
+	curl -fSL $PageForms_DOWNLOAD_URL -o PageForms.zip \
+	&& unzip PageForms.zip -d extensions \
+	&& mv extensions/mwPageForms-master extensions/PageForms \
+	&& rm PageForms.zip
 
 #####################
 #

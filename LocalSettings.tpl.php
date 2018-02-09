@@ -206,15 +206,15 @@ $wgVisualEditorSupportedSkins[] = 'naturkunde';
 #
 ####################################
 wfLoadExtension( 'WikiEditor' );
+$wgDefaultUserOptions['usebetatoolbar'] = 1;
+$wgDefaultUserOptions['usebetatoolbar-cgd'] = 1;
 $wgEditToolbarGlobalEnable = true; ## CHECK LATER WHETHER NEEDED
 $wgWikiEditorFeatures['toolbar']        = array( 'global'=>true,  'user'=>true );
 $wgWikiEditorFeatures['dialogs']        = array( 'global'=>true,  'user'=>true );
 $wgWikiEditorFeatures['toc']            = array( 'global'=>false, 'user'=>true );
-$wgDefaultUserOptions['usebetatoolbar'] = 1;
-$wgDefaultUserOptions['usebetatoolbar-cgd'] = 1;
 $wgDefaultUserOptions['wikieditor-preview'] = 0;
 $wgDefaultUserOptions['useeditwarning'] = 1;
-
+$wgResourceLoaderDebug = true;
 
 ################################################################################################################
 #                                                                                                              #

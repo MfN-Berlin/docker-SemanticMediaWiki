@@ -141,7 +141,7 @@ $wgMainPageBackgroundImage = "@@bgImage@@";
 $wgMainPageBackgroundColor = "@@bgColor@@";
 
 # Hide the navigation tabs (edit, discussion) if on the Homepage (only works with skin 'Naturkunde')
-$wgMainPageHideNav = true;
+#$wgMainPageHideNav = true;
 
 # Open external links in new tab (useful when working with many forms)
 $wgExternalLinkTarget = '_blank';
@@ -464,6 +464,8 @@ if ( gethostbyaddr($_SERVER["REMOTE_ADDR"])=="@@parsoidContainer@@.@@network@@" 
 #	$wgNamespacePermissionLockdown[NS_EXTENDED]['read'] = array( '*' );
 #}
 
+$wgRedirectOnLogin = "Hauptseite";
+
 # Whitelist
 $wgWhitelistRead = array(
 		"Hauptseite", "Main Page", "Special:UserLogin", "Special:UserLogout", "Special:PasswordReset", "MediaWiki:Common.css", "MediaWiki:Common.js"
@@ -565,6 +567,6 @@ $sfgAutocompletionURLs['laender'] = 'http://10.0.2.15:10080/fp/autocomplete.php?
 $sfgAutocompletionURLs['rvk'] = 'http://10.0.2.15:10080/fp/autocomplete.php?source=rvk&search=<substr>';
 $sfgAutocompletionURLs['methoden'] = 'http://10.0.2.15:10080/fp/autocomplete.php?source=rvkfiltered&filter=methode|forschungsmethode&search=<substr>';
 
-enableSemantics( '10.0.2.15' );
+enableSemantics( 'museumfuernaturkunde.berlin/ikon' );
 
 

@@ -196,7 +196,7 @@ RUN cd $MW_DOCKERDIR; \
 RUN cd $MW_DOCKERDIR; \
 	curl -fSL $Lockdown_DOWNLOAD_URL -o Lockdown.tar.gz \
 	&& tar -xf Lockdown.tar.gz -C extensions \
-	&& mv extensions/mediawiki-extensions-Lockdown-fixed_1.27 extensions/Lockdown \
+	&& mv extensions/mediawiki-extensions-Lockdown-fix_1.27 extensions/Lockdown \
 	&& rm Lockdown.tar.gz
 	
 # download and untar the PDFEmbed extension

@@ -672,13 +672,17 @@ $sfgAutocompletionURLs['methoden'] = 'http://10.0.2.15:10080/fp/autocomplete.php
 
 enableSemantics( 'museumfuernaturkunde.berlin/ikon' );
 
-
+#############################
+#
+#     Authentication (LDAP)
+#
+#############################
 require_once ("$IP/extensions/LdapAuthentication/LdapAuthentication.php");
 
 $wgAuth = new LdapAuthenticationPlugin();
 
 $wgLDAPDomainNames = array("MUSEUM");
-$wgLDAPServerNames = array("MUSEUM" => "ldap.naturkundemuseum-berlin.de");
+$wgLDAPServerNames = array("MUSEUM" => "@@LDAP_URL@@");
 $wgLDAPSearchStrings = array("MUSEUM" => "MUSEUM\\USER-NAME");
 $wgLDAPEncryptionType = array("MUSEUM" => "clear");
 $wgLDAPUseLocal = true;
@@ -686,6 +690,6 @@ $wgMinimalPasswordLength = 1;
 $wgLDAPPort = array("MUSEUM" => 389);
 $wgLDAPGroupsUseMemberOf = array("MUSEUM" => true);
 
+# Required for first login. Only works if user can authenticate.
 $wgGroupPermissions['*']['autocreateaccount'] = true;
-
 

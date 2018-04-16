@@ -216,24 +216,6 @@ $wgDefaultUserOptions['wikieditor-preview'] = 0;
 $wgDefaultUserOptions['useeditwarning'] = 1;
 $wgResourceLoaderDebug = true;
 
-################################################################################################################
-#                                                                                                              #
-# LDAP                                                                                                         #
-# https://blog.ryandlane.com/2009/03/23/using-the-ldap-authentication-plugin-for-mediawiki-the-basics-part-1/  #
-#                                                                                                              #
-################################################################################################################
-require_once ("$IP/extensions/LdapAuthentication/LdapAuthentication.php");
-$wgAuth = new LdapAuthenticationPlugin();
-
-$wgLDAPDomainNames = array("MUSEUM");
-$wgLDAPServerNames = array("MUSEUM" => "ldap.naturkundemuseum-berlin.de");
-$wgLDAPSearchStrings = array("MUSEUM" => "MUSEUM\\USER-NAME");
-$wgLDAPEncryptionType = array("MUSEUM" => "clear");
-$wgLDAPUseLocal = true;
-$wgMinimalPasswordLength = 1;
-$wgLDAPPort = array("MUSEUM" => 389);
-$wgLDAPGroupsUseMemberOf = array("MUSEUM" => true);
-
 #############################
 #
 # Semantic MW
@@ -675,6 +657,7 @@ enableSemantics( 'museumfuernaturkunde.berlin/ikon' );
 #############################
 #
 #     Authentication (LDAP)
+# https://blog.ryandlane.com/2009/03/23/using-the-ldap-authentication-plugin-for-mediawiki-the-basics-part-1/  #
 #
 #############################
 require_once ("$IP/extensions/LdapAuthentication/LdapAuthentication.php");

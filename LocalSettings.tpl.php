@@ -269,26 +269,15 @@ $wgPFEnableStringFunctions = true;
 
 # CategoryTree
 require_once "$IP/extensions/CategoryTree/CategoryTree.php";
-// CategoryTree used in the sidebar
-$wgCategoryTreeSidebarRoot = 'Category:Inhaltsverzeichnis';
+$wgCategoryTreeSidebarRoot = 'Category:Inhaltsverzeichnis'; # Name of the category shown in the sidebar
 $wgCategoryTreeForceHeaders = true;
 $wgCategoryTreeSidebarOptions['mode'] = 'pages';
-# Show files in table of contents
-#$wgCategoryTreeSidebarOptions['mode'] = 'all';
+#$wgCategoryTreeSidebarOptions['mode'] = 'all'; # Show files in table of contents
 $wgCategoryTreeSidebarOptions['hideprefix'] = CT_MODE_PAGES;
 $wgCategoryTreeSidebarOptions['showcount'] = false;
 $wgCategoryTreeSidebarOptions['hideroot'] = true;
 $wgCategoryTreeSidebarOptions['namespaces'] = false;
 $wgCategoryTreeSidebarOptions['depth'] = 1;
-
-#https://www.mediawiki.org/wiki/Extension:Nuke
-#https://www.mediawiki.org/wiki/Extension:Replace_Text
-#http://biowikifarm.net/meta/Contributorlist
-#https://www.mediawiki.org/wiki/Extension:ParserFunctions
-#https://www.mediawiki.org/wiki/Extension:Variables
-#https://www.mediawiki.org/wiki/Extension:Create_Page
-#https://www.mediawiki.org/wiki/Extension:DismissableSiteNotice
-#https://www.mediawiki.org/wiki/Extension:TitleKey
 
 ########################
 #
@@ -334,216 +323,30 @@ $smwgNamespacesWithSemanticLinks[NS_STK] = true;
 
 #############################
 #
-# Zugriffsrechte per Namensraum
-# sieh: http://biowikifarm.net/v-mfn/sammlung/Rollen_und_Zugriffsrechte
+# Autorisation
 #
 #############################
-require_once "$IP/extensions/Lockdown/Lockdown.php";
 
-// erst oeffentlich machen, dann sperren mit Lockdown
-$wgGroupPermissions['*']['read'] = true;
-$wgGroupPermissions['*']['delete'] = true;
-#$wgGroupPermissions['mfnExtern']['read'] = true;
-$wgGroupPermissions['readOnly']['read'] = true;
+# Anonymous users can only read whitelisted pages
+$wgGroupPermissions['*']['read'] = false;
 
-$wgNamespacePermissionLockdown['*']['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown['*']['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
+# Logged-in users can read all pages
+$wgGroupPermissions['user']['read'] = true;
 
-// Arbeitsbereich - nur fuer eingeloggte MfN Nutzer zugaenglich
-$wgGroupPermissions['mfnUser']['createpage'] = true;
-$wgNamespacePermissionLockdown[NS_MAIN]['read'] = array('readOnly', 'mfnUser', 'mfnEditor', 'sysop' );
-$wgNamespacePermissionLockdown[NS_MAIN]['edit'] = array('mfnUser', 'mfnEditor', 'sysop' );
-$wgNamespacePermissionLockdown[NS_MAIN]['delete'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_MAIN]['createpage'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-
-$wgSpecialPageLockdown['Recentchanges'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-$wgSpecialPageLockdown['Specialpages'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-
-// Oeffentlich -  jeder kann lesen, nur Editor kann bearbeiten
-$wgNamespacePermissionLockdown[NS_PUBLIC]['edit'] = array('readOnly', 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_PUBLIC]['createpage'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_PUBLIC]['createtalk'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_PUBLIC]['move'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_PUBLIC]['delete'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_PUBLIC]['protect'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_PUBLIC]['undelete'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_PUBLIC]['upload'] = array( 'mfnEditor', 'sysop');
-
-// Vertraulich - nur fuer mfnUser, mfnEditor
-$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['read'] = array('readOnly', 'mfnUser', 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['edit'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['createpage'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['createtalk'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['move'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['delete'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['protect'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['undelete'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['upload'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-
-// Papierkorb - nur Editor kann lesen, loeschen, verschieben, aber keine Seiten erstellen
-$wgNamespacePermissionLockdown[NS_TRASH]['read'] = array('readOnly', 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_TRASH]['read'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_TRASH]['move'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_TRASH]['delete'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_TRASH]['undelete'] = array( 'mfnEditor', 'sysop');
-
-// Glossar -  jeder kann lesen, nur Editor kann bearbeiten
-$wgNamespacePermissionLockdown[NS_GLOSSARY]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GLOSSARY]['edit'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GLOSSARY]['createpage'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GLOSSARY]['createtalk'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GLOSSARY]['move'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GLOSSARY]['delete'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GLOSSARY]['protect'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GLOSSARY]['undelete'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GLOSSARY]['upload'] = array( 'mfnEditor', 'sysop');
-
-// Bedarfsanalyse - jeder kann lesen, nur Editor kann bearbeiten
-$wgNamespacePermissionLockdown[NS_GOAL]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GOAL]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GOAL]['createpage'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GOAL]['createtalk'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GOAL]['move'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GOAL]['delete'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GOAL]['protect'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GOAL]['undelete'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_GOAL]['upload'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_STK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_STK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_STK]['createpage'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_STK]['createtalk'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_STK]['move'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_STK]['delete'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_STK]['protect'] = array( 'mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_STK]['undelete'] = array( 'mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_STK]['upload'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-//
-// Default Namespaces, https://www.mediawiki.org/wiki/Manual:Namespace_constants
-//
-$wgNamespacePermissionLockdown[NS_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_USER]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_USER]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_USER_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_USER_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_PROJECT]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_PROJECT]['edit'] = array( 'mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_PROJECT_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_PROJECT_TALK]['edit'] = array( 'mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_FILE]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_FILE]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_FILE_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_FILE_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_MEDIAWIKI]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_MEDIAWIKI]['edit'] = array( 'sysop');
-
-$wgNamespacePermissionLockdown[NS_MEDIAWIKI_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_MEDIAWIKI_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_HELP]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_HELP]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_HELP_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_HELP_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_CATEGORY]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CATEGORY]['edit'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_CATEGORY_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_CATEGORY_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_MEDIA]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_MEDIA]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[NS_MEDIA_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[NS_MEDIA_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_SPECIAL]['read'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[NS_SPECIAL_TALK]['read'] = array( 'mfnUser', 'mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_TEMPLATE]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_TEMPLATE]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_TEMPLATE_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_TEMPLATE_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_IMAGE]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_IMAGE]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-$wgNamespacePermissionLockdown[NS_IMAGE_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-$wgNamespacePermissionLockdown[NS_IMAGE_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-//
-// SMW namespaces, https://www.semantic-mediawiki.org/wiki/Help:Namespaces
-//
-#$wgNamespacePermissionLockdown[SMW_NS_RELATION]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SMW_NS_RELATION]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[SMW_NS_RELATION_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SMW_NS_RELATION_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[SMW_NS_PROPERTY]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SMW_NS_PROPERTY]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[SMW_NS_PROPERTY_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SMW_NS_PROPERTY_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[NS_PROPERTY]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[NS_PROPERTY]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[NS_PROPERTY_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[NS_PROPERTY_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[SMW_NS_TYPE]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SMW_NS_TYPE]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[SMW_NS_TYPE_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SMW_NS_TYPE_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[SMW_NS_CONCEPT]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SMW_NS_CONCEPT]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[SMW_NS_CONCEPT_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SMW_NS_CONCEPT_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[PF_NS_FORM]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[PF_NS_FORM]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[PF_NS_FORM_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[PF_NS_FORM_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[SD_NS_FILTER]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SD_NS_FILTER]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
-
-#$wgNamespacePermissionLockdown[SD_NS_FILTER_TALK]['read'] = array( 'readOnly','mfnUser','mfnEditor', 'sysop');
-#$wgNamespacePermissionLockdown[SD_NS_FILTER_TALK]['edit'] = array( 'mfnUser','mfnEditor', 'sysop');
+# only users with role mfnEditor can edit
+$wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['user']['edit'] = false;
+$wgGroupPermissions['mfnEditor']['edit'] = true;
 
 # Allow Parsoid to use the api.
 # See: http://www.mediawiki.org/wiki/Talk:Parsoid#Running_Parsoid_on_a_.22private.22_wiki_-_AccessDeniedError
 # Also override Lockdown
-if ( gethostbyaddr($_SERVER["REMOTE_ADDR"])=="@@parsoidContainer@@.@@network@@" ) {
+if ( gethostbyaddr($_SERVER["REMOTE_ADDR"])=="ikon-parsoid.ikon-nw" ) {
         $wgGroupPermissions['*']['read'] = true;
         $wgNamespacePermissionLockdown[NS_MAIN]['read'] = array('*');
         $wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['read'] = array('*');
         $wgNamespacePermissionLockdown[NS_CATEGORY]['read'] = array('*');
         $wgGroupPermissions['*']['editinterface'] = true;
-}
-
-# Allow computers in the MfN Network (not Eduroam) read access to the Wikis main namespace
-$mfn_ips[] = '212.201.100.83'; # all desktops have the same remote address
-$mfn_ips[] = '10.0.2.15';
-if ( in_array($_SERVER['REMOTE_ADDR'], $mfn_ips ) ) {
-        $wgNamespacePermissionLockdown[NS_MAIN]['read'] = array( '*' );
-        $wgNamespacePermissionLockdown[NS_CATEGORY]['read'] = array( '*' );
 }
 
 $wgRedirectOnLogin = "Hauptseite";

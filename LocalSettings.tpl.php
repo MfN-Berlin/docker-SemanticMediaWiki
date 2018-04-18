@@ -267,6 +267,9 @@ $wgGroupPermissions['mfnEditor']['embed_pdf'] = true;
 wfLoadExtension( 'ParserFunctions' );
 $wgPFEnableStringFunctions = true;
 
+# arrays in semantic queries
+require_once "$IP/extensions/Arrays/Arrays.php";
+
 # CategoryTree
 require_once "$IP/extensions/CategoryTree/CategoryTree.php";
 $wgCategoryTreeSidebarRoot = 'Category:Inhaltsverzeichnis'; # Name of the category shown in the sidebar

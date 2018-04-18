@@ -39,6 +39,7 @@ ARG ParserFunctions_DOWNLOAD_URL
 ARG CategoryTree_DOWNLOAD_URL
 ARG WikiEditor_DOWNLOAD_URL
 ARG PageForms_DOWNLOAD_URL
+ARG Arrays_DOWNLOAD_URL
 
 #########################
 #
@@ -246,6 +247,12 @@ RUN cd $MW_DOCKERDIR; \
 	&& unzip PageForms.zip -d extensions \
 	&& mv extensions/mwPageForms-master extensions/PageForms \
 	&& rm PageForms.zip
+
+# download and untar the Arrays extension
+RUN cd $MW_DOCKERDIR; \
+	curl -fSL $Arrays_DOWNLOAD_URL -o Arrays.tar.gz \
+	&& tar -xf Arrays.tar.gz -C extensions \
+	&& rm Arrays.tar.gz
 
 #####################
 #

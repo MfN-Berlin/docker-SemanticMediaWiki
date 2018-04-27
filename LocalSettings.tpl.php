@@ -462,7 +462,7 @@ enableSemantics( 'museumfuernaturkunde.berlin/ikon' );
 
 #############################
 #
-#     Authentication (LDAP)
+# Authentication (LDAP)
 # https://blog.ryandlane.com/2009/03/23/using-the-ldap-authentication-plugin-for-mediawiki-the-basics-part-1/  #
 #
 #############################
@@ -481,4 +481,13 @@ $wgLDAPGroupsUseMemberOf = array("MUSEUM" => true);
 
 # Required for first login. Only works if user can authenticate.
 $wgGroupPermissions['*']['autocreateaccount'] = true;
+
+
+#############################
+#
+# Data protection banner
+#
+#############################
+wfLoadExtension( 'CookieWarning' );
+$wgCookieWarningEnabled=true;
 

@@ -40,6 +40,7 @@ ARG CategoryTree_DOWNLOAD_URL
 ARG WikiEditor_DOWNLOAD_URL
 ARG PageForms_DOWNLOAD_URL
 ARG Arrays_DOWNLOAD_URL
+ARG CookieWarning_DOWNLOAD_URL
 
 #########################
 #
@@ -107,9 +108,9 @@ RUN mkdir /etc/nginx/sites-enabled \
 # Database
 #
 ##############################
-RUN echo MYSQL_DATABASE: $MYSQL_DATABASE \
-    && cd $MW_DOCKERDIR \
-    && php maintenance/install.php \
+RUN echo MYSQL_DATABASE: $MYSQL_DATABASE
+RUN cd $MW_DOCKERDIR; \
+    php maintenance/install.php \
 		--dbname "$MYSQL_DATABASE" \
 		--dbpass "$MYSQL_PASSWORD" \
 		--dbserver "$MYSQL_HOST" \
@@ -132,8 +133,8 @@ RUN echo MYSQL_DATABASE: $MYSQL_DATABASE \
 COPY composer.local.json $MW_DOCKERDIR
 
 # run composer update (creates database tables)
-RUN cd $MW_DOCKERDIR \
-    && composer update --no-dev \
+RUN cd $MW_DOCKERDIR; \
+    composer update --no-dev \
     && php maintenance/update.php \
     \
 # Update Semantic MediaWiki
@@ -219,7 +220,12 @@ RUN set -x; cd $MW_DOCKERDIR; mkdir -p extensions \
 # download and untar the Arrays extension
   	&& curl -fSL $Arrays_DOWNLOAD_URL -o Arrays.tar.gz \
 	&& tar -xf Arrays.tar.gz -C extensions \
-	&& rm Arrays.tar.gz
+	&& rm Arrays.tar.gz \
+	\
+# download and untar the CookieWarning extension
+  	&& curl -fSL $CookieWarning_DOWNLOAD_URL -o CookieWarning.tar.gz \
+	&& tar -xf CookieWarning.tar.gz -C extensions \
+	&& rm CookieWarning.tar.gz
 
 #####################
 #

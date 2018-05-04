@@ -27,17 +27,17 @@ server {
 	}
 
 	# === Wiki: path=wiki ===
-	location /wiki {
+	location @@WikiPath@@ {
 		try_files $uri @do_wiki_wikipage;
  	}
 
 	location @do_wiki_wikipage {
-		rewrite "^/wiki$" /wiki/ redirect;
-		rewrite "^/wiki/([^?]*)(?:\?(.*))?$" /wiki/index.php?title=$1&$args last;
+		rewrite "^@@WikiPath@@$" @@WikiPath@@/ redirect;
+		rewrite "^@@WikiPath@@/([^?]*)(?:\?(.*))?$" @@WikiPath@@/index.php?title=$1&$args last;
 	}
 	
-	location /wiki/media {
-		location ~ ^/wiki/media/thumb/(archive/)?[0-9a-f]/[0-9a-f][0-9a-f]/([^/]+)/([0-9]+)px-.*$ {
+	location @@WikiPath@@/media {
+		location ~ ^@@WikiPath@@/media/thumb/(archive/)?[0-9a-f]/[0-9a-f][0-9a-f]/([^/]+)/([0-9]+)px-.*$ {
 			try_files $uri @thumb_wiki;
 		}
  	}

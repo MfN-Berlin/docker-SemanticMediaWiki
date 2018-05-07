@@ -65,8 +65,7 @@ server {
 	}
 	
         location /ontologies {
-		 autoindex on;
-		 try_files $uri $uri$ld_suffix =404;
+                 autoindex on;
+                 try_files $uri.owl $uri $uri$ld_suffix =404;
         }
-	
 }

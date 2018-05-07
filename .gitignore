@@ -2,3 +2,4 @@
 *~
 # generated from template by build.sh script
 sites-available-default
+*.owl

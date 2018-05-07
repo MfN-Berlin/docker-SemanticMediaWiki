@@ -97,6 +97,7 @@ RUN apt-get update \
 COPY nginx.conf /etc/nginx/
 RUN mkdir /etc/nginx/sites-available
 COPY sites-available-default /etc/nginx/sites-available/default
+COPY mime.types /etc/nginx/mime.type
 RUN mkdir /etc/nginx/sites-enabled \
     && ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
     \

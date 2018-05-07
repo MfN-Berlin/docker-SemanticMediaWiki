@@ -63,4 +63,10 @@ server {
 	location ~ /\.ht {
 		deny all;
 	}
+	
+        location /ontologies {
+		 autoindex on;
+		 try_files $uri $uri$ld_suffix =404;
+        }
+	
 }

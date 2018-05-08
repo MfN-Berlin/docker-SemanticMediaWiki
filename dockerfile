@@ -27,6 +27,7 @@ ARG MW_WIKIUSER
 ARG MW_EMAIL
 ARG DOMAIN_NAME
 ARG PROTOCOL
+ARG ONTOLOGY
 ARG UserFunctions_DOWNLOAD_URL
 ARG HeaderTabs_DOWNLOAD_URL
 ARG WikiCategoryTagCloud_DOWNLOAD_URL
@@ -103,9 +104,6 @@ RUN mkdir /etc/nginx/sites-enabled \
     \
 # Adding extra domain name
   && sed -i "s/localhost/localhost $DOMAIN_NAME/" /etc/nginx/conf.d/default.conf
-# Add ontology
-RUN mkdir /var/www/ontologies
-COPY ikon.owl  /var/www/ontologies 
 ##############################
 #
 # Database

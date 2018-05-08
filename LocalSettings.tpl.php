@@ -359,7 +359,7 @@ $wgWhitelistRead = array(
 	"Hauptseite", "Main Page", "Special:UserLogin",
 	"Special:UserLogout", "Special:PasswordReset",
 	"MediaWiki:Common.css", "MediaWiki:Common.js", 
-	"Forschungsprojekte:Datenschutz", "Forschungsprojekte:Impressum"
+	"NAVI_Tagung:Datenschutz", "NAVI_Tagung:Impressum"
 );
 
 ###################
@@ -491,3 +491,17 @@ $wgGroupPermissions['*']['autocreateaccount'] = true;
 wfLoadExtension( 'CookieWarning' );
 $wgCookieWarningEnabled=true;
 
+
+#############################
+#
+# Embed PDFs
+#
+#############################
+#require_once "$IP/extensions/PDFEmbed/PDFEmbed.php";
+wfLoadExtension( 'PDFEmbed' );
+//Default width for the PDF object container.
+$pdfEmbed['width'] = 870;
+//Default height for the PDF object container.
+$pdfEmbed['height'] = 625;
+# Extra Zugriffsrecht
+$wgGroupPermissions['mfnEditor']['embed_pdf'] = true;

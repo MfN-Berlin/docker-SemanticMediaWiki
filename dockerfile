@@ -27,6 +27,7 @@ ARG MW_WIKIUSER
 ARG MW_EMAIL
 ARG DOMAIN_NAME
 ARG PROTOCOL
+ARG ONTOLOGY
 ARG UserFunctions_DOWNLOAD_URL
 ARG HeaderTabs_DOWNLOAD_URL
 ARG WikiCategoryTagCloud_DOWNLOAD_URL
@@ -98,12 +99,12 @@ RUN apt-get update \
 COPY nginx.conf /etc/nginx/
 RUN mkdir /etc/nginx/sites-available
 COPY sites-available-default /etc/nginx/sites-available/default
+COPY mime.types /etc/nginx/mime.types
 RUN mkdir /etc/nginx/sites-enabled \
     && ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
     \
 # Adding extra domain name
   && sed -i "s/localhost/localhost $DOMAIN_NAME/" /etc/nginx/conf.d/default.conf
-
 ##############################
 #
 # Database

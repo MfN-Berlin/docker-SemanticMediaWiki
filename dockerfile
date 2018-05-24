@@ -42,6 +42,7 @@ ARG WikiEditor_DOWNLOAD_URL
 ARG PageForms_DOWNLOAD_URL
 ARG Arrays_DOWNLOAD_URL
 ARG CookieWarning_DOWNLOAD_URL
+ARG PDFEmbed_DOWNLOAD_URL
 
 #########################
 #
@@ -177,12 +178,6 @@ RUN set -x; cd $MW_DOCKERDIR; mkdir -p extensions \
 	&& mv extensions/mediawiki-extensions-Lockdown-fix_1.27 extensions/Lockdown \
 	&& rm Lockdown.tar.gz \
 	\
-# download and untar the PDFEmbed extension
-	&& curl -fSL $PDFEmbed_DOWNLOAD_URL -o PDFEmbed.zip \
-	&& unzip PDFEmbed.zip -d extensions \
-	&& mv extensions/PDFEmbed-2.0.0 extensions/PDFEmbed \
-	&& rm PDFEmbed.zip \
-	\
 # download and untar the VisualEditor extension
   	&& curl -fSL $VisualEditor_DOWNLOAD_URL -o VisualEditor.tar.gz \
 	&& tar -xf VisualEditor.tar.gz -C extensions \
@@ -226,7 +221,13 @@ RUN set -x; cd $MW_DOCKERDIR; mkdir -p extensions \
 # download and untar the CookieWarning extension
   	&& curl -fSL $CookieWarning_DOWNLOAD_URL -o CookieWarning.tar.gz \
 	&& tar -xf CookieWarning.tar.gz -C extensions \
-	&& rm CookieWarning.tar.gz
+	&& rm CookieWarning.tar.gz \
+	\
+# download and untar the PDFEmbed extension
+	&& curl -fSL $PDFEmbed_DOWNLOAD_URL -o PDFEmbed.zip \
+	&& unzip PDFEmbed.zip -d extensions \
+	&& mv extensions/PDFEmbed-master extensions/PDFEmbed \
+	&& rm PDFEmbed.zip
 
 #####################
 #

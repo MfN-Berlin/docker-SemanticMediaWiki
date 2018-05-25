@@ -358,8 +358,8 @@ $wgRedirectOnLogin = "Hauptseite";
 $wgWhitelistRead = array(
 	"Hauptseite", "Main Page", "Special:UserLogin",
 	"Special:UserLogout", "Special:PasswordReset",
-	"MediaWiki:Common.css", "MediaWiki:Common.js", 
-	"NAVI_Tagung:Datenschutz", "NAVI_Tagung:Impressum"
+	"MediaWiki:Common.css", "MediaWiki:Common.js",
+	"@@WikiName@@:Datenschutz", "@@WikiName@@:Impressum"
 );
 
 ###################

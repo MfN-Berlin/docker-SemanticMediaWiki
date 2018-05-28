@@ -262,7 +262,6 @@ $pdfEmbed['height'] = 625;
 # Extra Zugriffsrecht
 $wgGroupPermissions['mfnEditor']['embed_pdf'] = true;
 
-
 #parser functions
 wfLoadExtension( 'ParserFunctions' );
 $wgPFEnableStringFunctions = true;

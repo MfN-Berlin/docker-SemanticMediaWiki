@@ -32,7 +32,6 @@ ARG UserFunctions_DOWNLOAD_URL
 ARG HeaderTabs_DOWNLOAD_URL
 ARG WikiCategoryTagCloud_DOWNLOAD_URL
 ARG SimpleChanges_DOWNLOAD_URL
-ARG Lockdown_DOWNLOAD_URL
 ARG PDFEmbed_DOWNLOAD_URL
 ARG LDAP_DOWNLOAD_URL
 ARG VisualEditor_DOWNLOAD_URL
@@ -171,12 +170,6 @@ RUN set -x; cd $MW_DOCKERDIR; mkdir -p extensions \
 	&& curl -fSL $SimpleChanges_DOWNLOAD_URL -o SimpleChanges.tar.gz \
 	&& tar -xf SimpleChanges.tar.gz -C extensions \
 	&& rm SimpleChanges.tar.gz \
-	\
-# download and untar the Lockdown extension
-	&& curl -fSL $Lockdown_DOWNLOAD_URL -o Lockdown.tar.gz \
-	&& tar -xf Lockdown.tar.gz -C extensions \
-	&& mv extensions/mediawiki-extensions-Lockdown-fix_1.27 extensions/Lockdown \
-	&& rm Lockdown.tar.gz \
 	\
 # download and untar the VisualEditor extension
   	&& curl -fSL $VisualEditor_DOWNLOAD_URL -o VisualEditor.tar.gz \

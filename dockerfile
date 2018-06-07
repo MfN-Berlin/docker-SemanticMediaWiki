@@ -298,3 +298,5 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # run supervisor daemon to start apps
 CMD ["/usr/bin/supervisord"]
 
+#MetaLocalSettings to MW_DOCKERDIR
+COPY MetaLocalSettings.php $MW_DOCKERDIR

@@ -183,7 +183,7 @@ $wgGroupPermissions['mfnEditor']['edit'] = true;
 # Allow Parsoid to use the api.
 # See: http://www.mediawiki.org/wiki/Talk:Parsoid#Running_Parsoid_on_a_.22private.22_wiki_-_AccessDeniedError
 # Also override Lockdown
-if ( gethostbyaddr($_SERVER["REMOTE_ADDR"])=="@@parsoidContainer@@.@@network@@" ) {
+if ( array_key_exists("REMOTE_ADDR", $_SERVER) && gethostbyaddr($_SERVER["REMOTE_ADDR"])=="@@parsoidContainer@@.@@network@@" ) {
         $wgGroupPermissions['*']['read'] = true;
         $wgNamespacePermissionLockdown[NS_MAIN]['read'] = array('*');
         $wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['read'] = array('*');

@@ -1,6 +1,7 @@
 # Default server configuration
 #
 server {
+        client_max_body_size 20M;
 	listen 80 default_server;
 	listen [::]:80 default_server;
 

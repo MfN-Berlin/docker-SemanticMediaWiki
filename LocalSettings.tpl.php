@@ -174,6 +174,7 @@ $wgGroupPermissions['*']['read'] = false;
 
 # Logged-in users can read all pages
 $wgGroupPermissions['user']['read'] = true;
+$wgGroupPermissions['*']['embed_pdf'] = true;
 
 # only users with role mfnEditor can edit
 $wgGroupPermissions['*']['edit'] = false;

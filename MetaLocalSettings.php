@@ -33,6 +33,9 @@ $wgCacheDirectory = "$IP/cache";
 ## Disable create accounts
 $wgGroupPermissions['*']['createaccount'] = false;
 
+## Allow CSS on login and preferences
+$wgAllowSiteCSSOnRestrictedPages = true;
+
 #############################
 #
 #     Special pages

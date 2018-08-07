@@ -29,12 +29,13 @@ services:
         # Otherwise, defaults to:
         #   'Parsoid/<current-version-defined-in-package.json>'
         #userAgent: 'My-User-Agent-String'
+        strictAcceptCheck: false
 
         # Configure Parsoid to point to your MediaWiki instances.
         mwApis:
         - # This is the only required parameter,
           # the URL of you MediaWiki API endpoint.
-          uri: 'http://@@SMW_CONTAINER@@@@MW_SCRIPTPATH@@/api.php'
+          uri: 'http://localhost:80/@@MW_SCRIPTPATH@@/api.php'
           # The "domain" is used for communication with Visual Editor
           # and RESTBase.  It defaults to the hostname portion of
           # the `uri` property above, but you can manually set it

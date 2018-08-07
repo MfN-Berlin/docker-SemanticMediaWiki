@@ -61,7 +61,7 @@ VOLUME $MW_DOCKERDIR/images
 #
 ##############################
 RUN apt-get update \
-    && apt-get -y install nano vim net-tools zip curl git xz-utils \
+    && apt-get -y install nano vim net-tools zip curl git xz-utils make \
     \
 ##############################
 #
@@ -117,19 +117,7 @@ RUN set -ex \
 
 ENV NODE_VERSION 10.8.0
 
-#RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
-#  && case "${dpkgArch##*-}" in \
-#    amd64) ARCH='x64';; \
-#    ppc64el) ARCH='ppc64le';; \
-#    s390x) ARCH='s390x';; \
-#    arm64) ARCH='arm64';; \
-#    armhf) ARCH='armv7l';; \
-#    i386) ARCH='x86';; \
-#    *) echo "unsupported architecture"; exit 1 ;; \
-#  esac
-#RUN curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz"
 RUN curl -fsSLO --compressed https://nodejs.org/dist/v10.8.0/node-v10.8.0-linux-x64.tar.xz
-#RUN curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc"
 RUN curl -fsSLO --compressed https://nodejs.org/dist/v10.8.0/SHASUMS256.txt.asc
 RUN gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc 
 RUN grep "node-v10.8.0-linux-x64.tar.xz\$" SHASUMS256.txt | sha256sum -c - 
@@ -173,6 +161,7 @@ RUN mkdir /etc/nginx/sites-enabled \
     \
 # Adding extra domain name
   && sed -i "s/localhost/localhost $DOMAIN_NAME/" /etc/nginx/conf.d/default.conf
+
 ##############################
 #
 # Database
@@ -312,29 +301,9 @@ COPY $MW_BG $MW_DOCKERDIR
 #
 ##############################
 
-ARG PARSOID_VERSION=v0.8.0
-ENV WORKDIR /usr/src/parsoid
-WORKDIR $WORKDIR
-EXPOSE 8000
-
-RUN git clone \
-    --depth 1 \
-    -b ${PARSOID_VERSION} \
-    https://github.com/wikimedia/parsoid \
-    $WORKDIR \
-  && rm -rf $WORKDIR/.git/ \
-  \
-  && npm install && npm cache clean --force \
-  && rm -rf /var/lib/apt/lists/* /tmp/* \
-  \
-  && mkdir -p /data
-
-VOLUME /data
-
-COPY docker-entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["npm", "start"]
+RUN git clone https://github.com/wikimedia/parsoid
+RUN cd parsoid \
+&& npm install
 
 #######################
 #
@@ -375,7 +344,8 @@ RUN rm /mediawiki.tar.gz \
 # Somehow everything gets copied to $MW_DOCKERDIR
 # So remove all unecessary things.
   && rm  -f $MW_DOCKERDIR/nginx.conf \
-  && rm  -f $MW_DOCKERDIR/parsoid_config.yaml \
+  && rm  -f $MW_DOCKERDIR/config.yaml \
+  && rm  -f $MW_DOCKERDIR/config.tpl.yaml \
   && rm  -f $MW_DOCKERDIR/sites-available-default \
   && rm  -f $MW_DOCKERDIR/Dockerfile \
   && rm  -f $MW_DOCKERDIR/dockerfile \

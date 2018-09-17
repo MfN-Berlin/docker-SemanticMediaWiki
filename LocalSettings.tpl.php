@@ -164,18 +164,22 @@ $wgVisualEditorSupportedSkins[] = 'naturkunde';
 # Autorisation
 #
 #############################
+# Set to 1 when using scripts that require bot user.
+$installation = 0;
 
-# Anonymous users can only read whitelisted pages
-$wgGroupPermissions['*']['read'] = false;
+if (!$installation) {
+   # Anonymous users can only read whitelisted pages
+   $wgGroupPermissions['*']['read'] = false;
 
-# Logged-in users can read all pages
-$wgGroupPermissions['user']['read'] = true;
-$wgGroupPermissions['*']['embed_pdf'] = true;
+   # Logged-in users can read all pages
+   $wgGroupPermissions['user']['read'] = true;
+   $wgGroupPermissions['*']['embed_pdf'] = true;
 
-# only users with role mfnEditor can edit
-$wgGroupPermissions['*']['edit'] = false;
-$wgGroupPermissions['user']['edit'] = false;
-$wgGroupPermissions['mfnEditor']['edit'] = true;
+   # only users with role mfnEditor can edit
+   $wgGroupPermissions['*']['edit'] = false;
+   $wgGroupPermissions['user']['edit'] = false;
+   $wgGroupPermissions['mfnEditor']['edit'] = true;
+}
 
 # Allow Parsoid to use the api.
 # See: http://www.mediawiki.org/wiki/Talk:Parsoid#Running_Parsoid_on_a_.22private.22_wiki_-_AccessDeniedError

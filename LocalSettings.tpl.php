@@ -192,8 +192,6 @@ if ( array_key_exists("REMOTE_ADDR", $_SERVER) && gethostbyaddr($_SERVER["REMOTE
         $wgGroupPermissions['*']['editinterface'] = true;
 }
 
-$wgRedirectOnLogin = "Hauptseite";
-
 # Whitelist
 $wgWhitelistRead = array(
 	"Hauptseite", "Main Page", "Special:UserLogin",

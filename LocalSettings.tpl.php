@@ -179,6 +179,7 @@ if (!$installation) {
    $wgGroupPermissions['*']['edit'] = false;
    $wgGroupPermissions['user']['edit'] = false;
    $wgGroupPermissions['mfnEditor']['edit'] = true;
+   $wgGroupPermissions['mfnEditor']['delete'] = true;
 }
 
 # Allow Parsoid to use the api.

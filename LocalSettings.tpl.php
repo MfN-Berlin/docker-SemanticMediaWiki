@@ -222,3 +222,8 @@ $wgLDAPGroupsUseMemberOf = array("MUSEUM" => true);
 
 # Required for first login. Only works if user can authenticate.
 $wgGroupPermissions['*']['autocreateaccount'] = true;
+
+# Experimentell: Bilder und Links in Texte
+# see: https://www.semantic-mediawiki.org/wiki/Help:$smwgLinksInValues
+$smwgLinksInValues = SMW_LINV_OBFU;
+

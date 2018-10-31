@@ -42,6 +42,7 @@ ARG PageForms_DOWNLOAD_URL
 ARG Arrays_DOWNLOAD_URL
 ARG CookieWarning_DOWNLOAD_URL
 ARG PDFEmbed_DOWNLOAD_URL
+ARG HTMLets_DOWNLOAD_URL
 
 #########################
 #
@@ -278,7 +279,12 @@ RUN set -x; cd $MW_DOCKERDIR; mkdir -p extensions \
 	&& curl -fSL $PDFEmbed_DOWNLOAD_URL -o PDFEmbed.zip \
 	&& unzip PDFEmbed.zip -d extensions \
 	&& mv extensions/PDFEmbed-master extensions/PDFEmbed \
-	&& rm PDFEmbed.zip
+	&& rm PDFEmbed.zip \
+	\
+# download and untar the HTMLets extension
+  	&& curl -fSL $HTMLets_DOWNLOAD_URL -o HTMLets.tar.gz \
+	&& tar -xf HTMLets.tar.gz -C extensions \
+	&& rm HTMLets.tar.gz 
 
 #####################
 #
@@ -301,7 +307,10 @@ COPY $MW_BG $MW_DOCKERDIR
 #
 ##############################
 
-RUN git clone https://github.com/wikimedia/parsoid
+RUN wget https://github.com/wikimedia/parsoid/archive/v0.8.1.tar.gz -O parsoid.tar.gz
+RUN tar -xvf parsoid.tar.gz
+RUN mv parsoid-0.8.1/ parsoid
+#RUN git clone https://github.com/wikimedia/parsoid
 RUN cd parsoid \
 && npm install
 

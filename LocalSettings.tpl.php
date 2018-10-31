@@ -227,3 +227,11 @@ $wgGroupPermissions['*']['autocreateaccount'] = true;
 # see: https://www.semantic-mediawiki.org/wiki/Help:$smwgLinksInValues
 $smwgLinksInValues = SMW_LINV_OBFU;
 
+#############################
+#
+# Allow custom HTML snippets
+# (e.g. the scroller on the home page)
+#
+#############################
+require_once "$IP/extensions/HTMLets/HTMLets.php";
+$wgHTMLetsDirectory = "$IP/htmlets";

@@ -198,7 +198,8 @@ $wgWhitelistRead = array(
 	"Hauptseite", "Main Page", "Special:UserLogin",
 	"Special:UserLogout", "Special:PasswordReset",
 	"MediaWiki:Common.css", "MediaWiki:Common.js",
-	"@@WikiName@@:Datenschutz", "@@WikiName@@:Impressum"
+	"@@WikiName@@:Datenschutz", "@@WikiName@@:Impressum",
+	"MediaWiki:About", "FAQ_@@WikiName@@"
 );
 
 #############################

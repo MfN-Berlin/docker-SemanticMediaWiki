@@ -177,9 +177,12 @@ if (!$installation) {
 
    # only users with role mfnEditor can edit
    $wgGroupPermissions['*']['edit'] = false;
-   $wgGroupPermissions['user']['edit'] = false;
+   $wgGroupPermissions['user']['edit'] = true;
+   $wgGroupPermissions['user']['upload'] = false;
    $wgGroupPermissions['mfnEditor']['edit'] = true;
    $wgGroupPermissions['mfnEditor']['delete'] = true;
+   $wgGroupPermissions['mfnEditor']['protect'] = true;
+   $wgGroupPermissions['mfnEditor']['upload'] = true;
 }
 
 # Allow Parsoid to use the api.

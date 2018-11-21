@@ -174,15 +174,18 @@ if (!$installation) {
    # Logged-in users can read all pages
    $wgGroupPermissions['user']['read'] = true;
    $wgGroupPermissions['*']['embed_pdf'] = true;
+   $wgGroupPermissions['*']['createpage'] = false;
 
    # only users with role mfnEditor can edit
    $wgGroupPermissions['*']['edit'] = false;
    $wgGroupPermissions['user']['edit'] = true;
    $wgGroupPermissions['user']['upload'] = false;
+   $wgGroupPermissions['user']['createpage'] = false;
    $wgGroupPermissions['mfnEditor']['edit'] = true;
    $wgGroupPermissions['mfnEditor']['delete'] = true;
    $wgGroupPermissions['mfnEditor']['protect'] = true;
    $wgGroupPermissions['mfnEditor']['upload'] = true;
+   $wgGroupPermissions['mfnEditor']['createpage'] = true;
 }
 
 # Allow Parsoid to use the api.

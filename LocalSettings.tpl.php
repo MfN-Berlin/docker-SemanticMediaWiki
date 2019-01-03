@@ -166,18 +166,21 @@ $wgVisualEditorSupportedSkins[] = 'naturkunde';
 #############################
 # Set to 1 when using scripts that require bot user.
 $installation = 0;
-
 if (!$installation) {
    # Anonymous users can only read whitelisted pages
    $wgGroupPermissions['*']['read'] = false;
+   $wgGroupPermissions['*']['delete'] = false;
+   $wgGroupPermissions['*']['protect'] = false;
+   $wgGroupPermissions['*']['upload'] = false;
+   $wgGroupPermissions['*']['createpage'] = false;
+   $wgGroupPermissions['*']['edit'] = false;
+   $wgGroupPermissions['*']['move'] = false;
 
    # Logged-in users can read all pages
    $wgGroupPermissions['user']['read'] = true;
    $wgGroupPermissions['*']['embed_pdf'] = true;
-   $wgGroupPermissions['*']['createpage'] = false;
 
-   # only users with role mfnEditor can edit
-   $wgGroupPermissions['*']['edit'] = false;
+   # All logged-in users can edit pages in the article namespace
    $wgGroupPermissions['user']['edit'] = true;
    $wgGroupPermissions['user']['upload'] = false;
    $wgGroupPermissions['user']['createpage'] = false;

@@ -190,6 +190,8 @@ if (!$installation) {
    $wgGroupPermissions['mfnEditor']['upload'] = true;
    $wgGroupPermissions['mfnEditor']['createpage'] = true;
    $wgGroupPermissions['mfnEditor']['editinterface'] = true;
+} else {
+   $wgGroupPermissions['*']['protect'] = true;
 }
 
 # Allow Parsoid to use the api.
@@ -201,6 +203,57 @@ if ( array_key_exists("REMOTE_ADDR", $_SERVER) && gethostbyaddr($_SERVER["REMOTE
         $wgNamespacePermissionLockdown[NS_CONFIDENTIAL]['read'] = array('*');
         $wgNamespacePermissionLockdown[NS_CATEGORY]['read'] = array('*');
         $wgGroupPermissions['*']['editinterface'] = true;
+}
+
+# Allow users on the local network to read-only access
+function isValidLocalIP($ip) {
+        // IPs should be local
+        if (substr($ip, 0, 8)!="192.168.") {
+                return false;
+        }
+        // validate IPs
+        if (!filter_var ($ip, FILTER_VALIDATE_IP)) {
+                return false;
+        }
+        return true;
+}
+function isLocalClient(){
+    // Nothing to do without any reliable information
+    if (!isset ($_SERVER['REMOTE_ADDR'])) {
+        return false;
+    }
+
+    // Header that is used by the trusted proxy to refer to
+    // the original IP
+    $proxy_header = "HTTP_X_FORWARDED_FOR";
+
+    // List of all the proxies that are known to handle 'proxy_header'
+    // in known, safe manner
+    $trusted_proxy = "192.168.100.10";
+
+    if (array_key_exists($proxy_header, $_SERVER)) {
+        // Header can contain multiple IP-s of proxies that are passed through.
+        $proxy_list = array_map('trim', explode (",", $_SERVER[$proxy_header]));
+        // Trusted prroxy should be in IP list
+        if (in_array($trusted_proxy, $proxy_list)) {
+                foreach ($proxy_list as $ip) {
+                        if (!isValidLocalIP($ip)) return false;
+                }
+                return true;
+        } else {
+                return false;
+        }
+    } elseif (!isValidLocalIP($_SERVER['REMOTE_ADDR'])) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+#print_r($_SERVER);
+#print(isLocalClient());
+if(isLocalClient()) {
+    $wgGroupPermissions['*']['read'] = true;
 }
 
 # Whitelist

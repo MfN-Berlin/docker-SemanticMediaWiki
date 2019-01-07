@@ -57,6 +57,7 @@ server {
 		
 		# Script filename
 		fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		fastcgi_param HTTP_X_FORWARDED_FOR $http_x_forwarded_for;
 	}
 
 	# deny access to .htaccess files, if Apache's document root

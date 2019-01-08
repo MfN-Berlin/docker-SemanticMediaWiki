@@ -192,6 +192,7 @@ if (!$installation) {
    $wgGroupPermissions['mfnEditor']['editinterface'] = true;
 } else {
    $wgGroupPermissions['*']['protect'] = true;
+   $wgGroupPermissions['*']['editprotected'] = true;
 }
 
 # Allow Parsoid to use the api.

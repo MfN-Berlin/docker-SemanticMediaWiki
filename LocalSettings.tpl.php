@@ -121,7 +121,7 @@ $wgLogo = "@@Logo@@";
 #$wgMainPageHideNav = true;
 
 # Open external links in new tab (useful when working with many forms)
-$wgExternalLinkTarget = '_blank';
+#$wgExternalLinkTarget = '_blank';
 
 # Allow pages to customize the title (necessary for localization of imported ontologies).
 $wgRestrictDisplayTitle = false;

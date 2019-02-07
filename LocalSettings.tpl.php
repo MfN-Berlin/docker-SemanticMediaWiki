@@ -95,7 +95,7 @@ $wgMemCachedServers = [];
 #############################
 
 # Site language code, should be one of the list in ./languages/data/Names.php
-$wgLanguageCode = "de";
+$wgLanguageCode = "de-formal";
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'vector', 'monobook':
 $wgDefaultSkin = "@@skin@@";

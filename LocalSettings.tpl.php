@@ -259,7 +259,7 @@ if(isLocalClient()) {
 
 # Whitelist
 $wgWhitelistRead = array(
-	"Hauptseite", "Main Page", "Special:UserLogin",
+	"Special:UserLogin",
 	"Special:UserLogout", "Special:PasswordReset",
 	"MediaWiki:Common.css", "MediaWiki:Common.js",
 	"@@WikiName@@:Datenschutz", "@@WikiName@@:Impressum",

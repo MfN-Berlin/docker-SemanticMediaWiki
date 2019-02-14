@@ -300,3 +300,13 @@ $smwgLinksInValues = SMW_LINV_OBFU;
 #############################
 require_once "$IP/extensions/HTMLets/HTMLets.php";
 $wgHTMLetsDirectory = "$IP/htmlets";
+
+#############################
+#
+# Restrict search
+# 
+#############################
+
+$wgNamespacesToBeSearchedDefault = [
+        NS_MAIN => true,
+];

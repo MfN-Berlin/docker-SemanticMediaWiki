@@ -308,5 +308,6 @@ $wgHTMLetsDirectory = "$IP/htmlets";
 #############################
 
 $wgNamespacesToBeSearchedDefault = [
-        NS_MAIN => true,
+NS_MAIN => true,
+SMW_NS_PROPERTY => false,
 ];

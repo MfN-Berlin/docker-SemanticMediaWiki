@@ -178,7 +178,10 @@ if (!$installation) {
 
    # Logged-in users can read all pages
    $wgGroupPermissions['user']['read'] = true;
-   $wgGroupPermissions['*']['embed_pdf'] = true;
+   $wgGroupPermissions['user']['embed_pdf'] = true;
+
+   # bots
+   $wgGroupPermissions['bot']['read'] = true;
 
    # All logged-in users can edit pages in the article namespace
    $wgGroupPermissions['user']['edit'] = true;

@@ -62,32 +62,19 @@ VOLUME $MW_DOCKERDIR/images
 #
 ##############################
 RUN apt-get update \
-    && apt-get -y install nano vim net-tools zip curl git xz-utils make \
-    \
+    && apt-get -y install nano vim net-tools zip curl git xz-utils make
+    
 ##############################
 #
 # Mediawiki core
 #
 ##############################
-# https://www.mediawiki.org/keys/keys.txt
-    && gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys \
-	441276E9CCD15F44F6D97D18C119E1A64D70938E \
-	41B2ABE817ADD3E52BDA946F72BC1C5D23107F8A \
-	162432D9E81C1C618B301EECEE1F663462D84F01 \
-	1D98867E82982C8FE0ABC25F9B69B3109D3BB7B0 \
-	3CEF8262806D3F0B6BA1DBDD7956EE477F901A30 \
-	280DB7845A1DCAC92BB5A00A946B02565DC00AA7 \
-    \
-    && MEDIAWIKI_DOWNLOAD_URL="https://releases.wikimedia.org/mediawiki/$MEDIAWIKI_VERSION/mediawiki-$MEDIAWIKI_FULL_VERSION.tar.gz"; \
+RUN MEDIAWIKI_DOWNLOAD_URL="https://releases.wikimedia.org/mediawiki/$MEDIAWIKI_VERSION/mediawiki-$MEDIAWIKI_FULL_VERSION.tar.gz"; \
 	set -x; \
 	mkdir -p $MW_DOCKERDIR \
     && curl -fSL "$MEDIAWIKI_DOWNLOAD_URL" -o mediawiki.tar.gz \
-    && curl -fSL "${MEDIAWIKI_DOWNLOAD_URL}.sig" -o mediawiki.tar.gz.sig \
-    && gpg --verify mediawiki.tar.gz.sig \
     && tar -xf mediawiki.tar.gz -C $MW_DOCKERDIR --strip-components=1 \
-    \
     && set -x; echo $MYSQL_HOST >> /tmp/startpath; cat /tmp/startpath \
-    \
     && set -x; echo "Host is $MYSQL_HOST"
 
 #######################
@@ -98,52 +85,22 @@ RUN apt-get update \
 RUN groupadd --gid 1000 node \
   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node
 
-# gpg keys listed at https://github.com/nodejs/node#release-team
-RUN set -ex \
-  && for key in \
-    94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
-    FD3A5288F042B6850C66B31F09FE44734EB7990E \
-    71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
-    DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
-    C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
-    B9AE9905FFD7803F25714661B63B535A4C206CA9 \
-    56730D5401028683275BD23C23EFEFE93C4CFFFE \
-    77984A986EBC2AA786BC0F66B01FBB92821C587A \
-    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
-  ; do \
-    gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" || \
-    gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
-    gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" ; \
-  done
-
 ENV NODE_VERSION 10.8.0
 
-RUN curl -fsSLO --compressed https://nodejs.org/dist/v10.8.0/node-v10.8.0-linux-x64.tar.xz
-RUN curl -fsSLO --compressed https://nodejs.org/dist/v10.8.0/SHASUMS256.txt.asc
-RUN gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc 
-RUN grep "node-v10.8.0-linux-x64.tar.xz\$" SHASUMS256.txt | sha256sum -c - 
-RUN tar -xJf "node-v10.8.0-linux-x64.tar.xz" -C /usr/local --strip-components=1 --no-same-owner 
-RUN rm "node-v10.8.0-linux-x64.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt 
-RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs
+RUN curl -fsSLO --compressed https://nodejs.org/dist/v10.8.0/node-v10.8.0-linux-x64.tar.xz \
+  && tar -xJf "node-v10.8.0-linux-x64.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
+  && rm "node-v10.8.0-linux-x64.tar.xz" \
+  && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
 ENV YARN_VERSION 1.9.2
 
-RUN set -ex \
-  && for key in \
-    6A010C5166006599AA17F08146C2130DFD2497F5 \
-  ; do \
-    gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" || \
-    gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
-    gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" ; \
-  done \
-  && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
+RUN curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
   && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc" \
-  && gpg --batch --verify yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
   && mkdir -p /opt \
   && tar -xzf yarn-v$YARN_VERSION.tar.gz -C /opt/ \
   && ln -s /opt/yarn-v$YARN_VERSION/bin/yarn /usr/local/bin/yarn \
   && ln -s /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \
-  && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz
+  && rm yarn-v$YARN_VERSION.tar.gz
 
 CMD [ "node" ]
 
@@ -158,10 +115,7 @@ RUN mkdir /etc/nginx/sites-available
 COPY sites-available-default /etc/nginx/sites-available/default
 COPY mime.types /etc/nginx/mime.types
 RUN mkdir /etc/nginx/sites-enabled \
-    && ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
-    \
-# Adding extra domain name
-  && sed -i "s/localhost/localhost $DOMAIN_NAME/" /etc/nginx/conf.d/default.conf
+    && ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
 ##############################
 #
@@ -310,7 +264,6 @@ COPY $MW_BG $MW_DOCKERDIR
 RUN wget https://github.com/wikimedia/parsoid/archive/v0.8.1.tar.gz -O parsoid.tar.gz
 RUN tar -xvf parsoid.tar.gz
 RUN mv parsoid-0.8.1/ parsoid
-#RUN git clone https://github.com/wikimedia/parsoid
 RUN cd parsoid \
 && npm install
 
@@ -348,10 +301,8 @@ RUN chown -R root:root $MW_DOCKERDIR/ \
 
 # cleanup installation files
 RUN rm /mediawiki.tar.gz \
-    && rm /mediawiki.tar.gz.sig \
     \
-# Somehow everything gets copied to $MW_DOCKERDIR
-# So remove all unecessary things.
+# Remove all unecessary things.
   && rm  -f $MW_DOCKERDIR/nginx.conf \
   && rm  -f $MW_DOCKERDIR/config.yaml \
   && rm  -f $MW_DOCKERDIR/config.tpl.yaml \
@@ -374,6 +325,9 @@ RUN rm /mediawiki.tar.gz \
 #######################
 #MetaLocalSettings to MW_DOCKERDIR
 COPY MetaLocalSettings.php $MW_DOCKERDIR
+
+# dir to store php-fpm socket
+RUN mkdir -p mkdir /run/php
 
 # Do this after cleanup, otherwise it gets deleted
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf

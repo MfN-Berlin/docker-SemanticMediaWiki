@@ -314,3 +314,7 @@ $wgNamespacesToBeSearchedDefault = [
 NS_MAIN => true,
 SMW_NS_PROPERTY => false,
 ];
+
+# easyDB external images
+$wgAllowExternalImages = true;
+$wgAllowImageTag = true;
